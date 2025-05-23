@@ -16,6 +16,12 @@ $digit+                                 { IntTok .read }
 "PI"                                    { const PiTok }
 "PHI"                                   { const PhiTok }
 "AVOGADRO"                              { const AvogadroTok }
+"+="                                    { const PlusEqTok }
+"-="                                    { const MinusEqTok }
+"*="                                    { const MultEqTok }
+"/="                                    { const DivEqTok }
+"%="                                    { const ModEqTok }
+"--"                                    { const DecrementTok }
 "+"                                     { const PlusTok }
 "-"                                     { const MinusTok }
 "*"                                     { const MultTok }
@@ -86,6 +92,7 @@ $white+                                 ;
 
 {
 data Token = PlusTok | MinusTok | MultTok | DivTok | ExpTok | ModTok | MathSqrtTok
+              | PlusEqTok | MinusEqTok | MultEqTok | DivEqTok | ModEqTok | DecrementTok
               | AndTok | OrTok | NotTok
               | TrueTok | FalseTok | NullTok
               | SemicolonTok

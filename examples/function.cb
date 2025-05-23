@@ -23,7 +23,8 @@ fn loop(int[] arr){
 fn loop() {
 	int count = 0
 	for count < 20 {
+        count ++
 			print(count)
 	}
-			
+
 }

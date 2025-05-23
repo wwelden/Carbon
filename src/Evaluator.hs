@@ -1,6 +1,6 @@
 module Evaluator where
     import qualified Parser as P
-    import Parser (Statement(..), Expr(..), BOp(..), ClassMember(..), Var, ClassName, FieldName, MethodName, Pattern(..), Literal(..), MatchCase)
+    import Parser (Statement(..), Expr(..), BOp(..), CompoundOp(..), ClassMember(..), Var, ClassName, FieldName, MethodName, Pattern(..), Literal(..), MatchCase)
     import Debug.Trace
     import Data.Maybe
     import System.IO.Unsafe
@@ -160,6 +160,37 @@ module Evaluator where
     evalStmt ctx (ForInStmt var arrayExpr stmts) =
         case eval ctx arrayExpr of
             Just (ArrayVal vals, st) -> forInStmtLoop ctx{store = st} var vals stmts
+            _ -> Nothing
+    evalStmt ctx (CompoundAssignStmt var op expr) =
+        case (lookupEnv var (env ctx), eval ctx expr) of
+            (Just oldVal, Just (newVal, st)) ->
+                case evalCompoundOp op oldVal newVal of
+                    Just resultVal ->
+                        let newEnv = updateEnv var resultVal (env ctx)
+                        in Just (ctx{store = st, env = newEnv}, resultVal)
+                    Nothing -> Nothing
+            _ -> Nothing
+    evalStmt ctx (IncrementStmt var) =
+        case lookupEnv var (env ctx) of
+            Just (IntVal i) ->
+                let newVal = IntVal (i + 1)
+                    newEnv = updateEnv var newVal (env ctx)
+                in Just (ctx{env = newEnv}, newVal)
+            Just (DoubleVal f) ->
+                let newVal = DoubleVal (f + 1.0)
+                    newEnv = updateEnv var newVal (env ctx)
+                in Just (ctx{env = newEnv}, newVal)
+            _ -> Nothing
+    evalStmt ctx (DecrementStmt var) =
+        case lookupEnv var (env ctx) of
+            Just (IntVal i) ->
+                let newVal = IntVal (i - 1)
+                    newEnv = updateEnv var newVal (env ctx)
+                in Just (ctx{env = newEnv}, newVal)
+            Just (DoubleVal f) ->
+                let newVal = DoubleVal (f - 1.0)
+                    newEnv = updateEnv var newVal (env ctx)
+                in Just (ctx{env = newEnv}, newVal)
             _ -> Nothing
 
     -- Pattern matching functions
@@ -390,6 +421,14 @@ module Evaluator where
             Just (ErrorVal _, st) -> Just (BoolVal True, st)
             Just (_, st) -> Just (BoolVal False, st)
             Nothing -> Nothing
+
+
+    evalCompoundOp :: CompoundOp -> Value -> Value -> Maybe Value
+    evalCompoundOp PlusEq = binaryOp (+) (+)
+    evalCompoundOp MinusEq = binaryOp (-) (-)
+    evalCompoundOp MultEq = binaryOp (*) (*)
+    evalCompoundOp DivEq = divOp
+    evalCompoundOp ModEq = modOp
 
     forLoop :: Context -> Var -> Expr -> Expr -> Expr -> Maybe (Value, Store)
     forLoop ctx var cond update body =

@@ -20,6 +20,12 @@ import Data.Maybe
     '-'             { MinusTok }
     '*'             { MultTok }
     '/'             { DivTok }
+    '+='            { PlusEqTok }
+    '-='            { MinusEqTok }
+    '*='            { MultEqTok }
+    '/='            { DivEqTok }
+    '%='            { ModEqTok }
+    '--'            { DecrementTok }
     '('             { LParenTok }
     ')'             { RParenTok }
     '!'             { NotTok }
@@ -109,6 +115,13 @@ Statement: Expr ';'                   {ExprStmt $1}
     | TypeDecl var '=' Expr           {TypedVarStmt $1 $2 $4}
     | fn var '(' ParamList ')' Type '{' StmtList return Expr '}' {FnDeclStmt $2 $4 $6 $8 $10}
     | for var in Expr '{' StmtList '}' {ForInStmt $2 $4 $6}
+    | var '+=' Expr ';'               {CompoundAssignStmt $1 PlusEq $3}
+    | var '-=' Expr ';'               {CompoundAssignStmt $1 MinusEq $3}
+    | var '*=' Expr ';'               {CompoundAssignStmt $1 MultEq $3}
+    | var '/=' Expr ';'               {CompoundAssignStmt $1 DivEq $3}
+    | var '%=' Expr ';'               {CompoundAssignStmt $1 ModEq $3}
+    | var '++' ';'                    {IncrementStmt $1}
+    | var '--' ';'                    {DecrementStmt $1}
 
 ExprList : {- empty -}                { [] }
     | Expr                            {[$1]}
@@ -237,6 +250,9 @@ data Statement = ExprStmt Expr
     | TypedVarStmt Type Var Expr
     | FnDeclStmt Var [(Type, Var)] Type [Statement] Expr
     | ForInStmt Var Expr [Statement]
+    | CompoundAssignStmt Var CompoundOp Expr
+    | IncrementStmt Var
+    | DecrementStmt Var
     deriving (Show, Eq)
 
 data Type = IntType | BoolType | StringType | ArrayType Type
@@ -313,6 +329,9 @@ data BOp = PlusOp
     | GeqOp
     | AndOp
     | OrOp
+    deriving (Show, Eq)
+
+data CompoundOp = PlusEq | MinusEq | MultEq | DivEq | ModEq
     deriving (Show, Eq)
 
 parseError :: [Token] -> Maybe a

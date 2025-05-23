@@ -124,6 +124,15 @@ let message = "Hello Carbon";
 x + y;          // 52
 x ** 2;         // 1764
 
+// Compound assignment and increment/decrement
+x += 10;        // x = 52
+x *= 2;         // x = 104
+x /= 4;         // x = 26
+x -= 6;         // x = 20
+x %= 7;         // x = 6
+x++;            // x = 7
+x--;            // x = 6
+
 // Comparisons and ternary
 x > y ? "greater" : "lesser";  // "greater"
 
@@ -207,7 +216,7 @@ Carbon is implemented in Haskell using:
 - Custom evaluator with environment-based evaluation (`src/Evaluator.hs`)
 - REPL with error handling (`src/Main.hs`)
 
-**Parser Status**: 84 shift/reduce conflicts (actively being reduced)
+**Parser Status**: 184 shift/reduce conflicts (actively being reduced)
 
 ## Contributing
 
@@ -237,6 +246,8 @@ cat examples/pattern_matching.cb | bin/carbon
 
 ## Recent Accomplishments
 
+- ✅ **Compound Assignment Operators**: `+=`, `-=`, `*=`, `/=`, `%=` for concise variable updates
+- ✅ **Increment/Decrement Operators**: `++` and `--` for convenient counting operations
 - ✅ **Go-Style Error Handling**: Explicit error values with `err()` and `isErr()` functions
 - ✅ **Tuples**: Multi-value returns with `(value1, value2, ...)` syntax
 - ✅ **Pattern Matching**: Full implementation with literal, variable, array, and wildcard patterns
