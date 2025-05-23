@@ -41,13 +41,18 @@ bin/carbon
   - Boolean/String patterns: `match flag { true => "on", false => "off" }`
   - Null patterns: `match value { null => "empty", x => "has value" }`
   - Wildcard patterns: `_` matches anything
+- **Go-Style Error Handling**: Explicit error values and checking (no exceptions)
+  - Error creation: `err("something went wrong")`
+  - Error checking: `isErr(value)` returns boolean
+  - Tuples for multiple returns: `(result, error)` pattern
+  - Explicit error handling: `if (isErr(result)) { ... } else { ... }`
 
 ### 🚧 In Development
 
 - Function declarations with type annotations
 - Object-oriented programming (classes, methods)
 - More loop constructs (while, for-range)
-- Error handling
+- Multi-parameter arrow functions
 
 ## Directory Structure
 
@@ -154,6 +159,32 @@ match [1, x, 3] {
     [1, y, 3] => y * 100,  // Binds y=2, returns 200
     _ => 0
 };
+
+// Go-style error handling
+let divide = x => y => {
+    if (y == 0) {
+        err("division by zero")
+    } else {
+        x / y
+    }
+};
+
+let result = divide(10)(2);  // 5
+let error = divide(10)(0);   // error: "division by zero"
+
+isErr(result);  // false
+isErr(error);   // true
+
+// Tuples for multiple returns
+let operation = x => (x * 2, null);  // (result, error)
+let tuple = operation(21);           // (42, null)
+
+// Error checking pattern
+if (isErr(result)) {
+    print("Error occurred");
+} else {
+    print("Success!");
+}
 ```
 
 ## Language Design
@@ -176,17 +207,17 @@ Carbon is implemented in Haskell using:
 - Custom evaluator with environment-based evaluation (`src/Evaluator.hs`)
 - REPL with error handling (`src/Main.hs`)
 
-**Parser Status**: 76 shift/reduce conflicts (actively being reduced)
+**Parser Status**: 84 shift/reduce conflicts (actively being reduced)
 
 ## Contributing
 
 The Carbon language is actively being developed. Current priorities:
 
-1. **Parser Optimization**: Reduce shift/reduce conflicts from 76
-2. **Enhanced Pattern Matching**: Add guards, nested patterns, or expressions
-3. **Function Declarations**: Type annotations and multiple parameters
+1. **Parser Optimization**: Reduce shift/reduce conflicts from 84
+2. **Multi-Parameter Functions**: Support for `(x, y) => x + y` syntax
+3. **Function Declarations**: Type annotations and complex signatures
 4. **Object-Oriented Features**: Classes, inheritance, methods
-5. **Error Handling**: Try/catch mechanisms
+5. **Enhanced Pattern Matching**: Add guards, nested patterns, or expressions
 6. **Standard Library**: Built-in functions and utilities
 
 ### Development Workflow
@@ -206,6 +237,8 @@ cat examples/pattern_matching.cb | bin/carbon
 
 ## Recent Accomplishments
 
+- ✅ **Go-Style Error Handling**: Explicit error values with `err()` and `isErr()` functions
+- ✅ **Tuples**: Multi-value returns with `(value1, value2, ...)` syntax
 - ✅ **Pattern Matching**: Full implementation with literal, variable, array, and wildcard patterns
 - ✅ **Arrow Functions**: JavaScript-style `x => x + 1` syntax
 - ✅ **For-In Loops**: Go-style `for item in array { ... }`

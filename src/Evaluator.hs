@@ -13,9 +13,12 @@ module Evaluator where
                | NullVal
                | ArrayVal [Value]
                | FuncVal Env Var Expr
+               | MultiFuncVal Env [Var] Expr
                | TypedFuncVal Env [(P.Type, Var)] P.Type [Statement] Expr
                | ObjectVal ClassName [(FieldName, Value)] [(MethodName, Var, Expr)]
                | PrintVal String
+               | ErrorVal String
+               | TupleVal [Value]
                deriving (Show, Eq)
 
     data Type = IntType | BoolType | StringType | ArrayType Type
@@ -271,12 +274,22 @@ module Evaluator where
             Just (BoolVal b, st) -> Just (BoolVal (not b), st)
             _ -> Nothing
     eval ctx (FuncExpr var e) = Just (FuncVal (env ctx) var e, store ctx)
+    eval ctx (MultiFuncExpr vars e) = Just (MultiFuncVal (env ctx) vars e, store ctx)
     eval ctx (FunctionExpr var e) = Just (FuncVal (env ctx) var e, store ctx)
     eval ctx (ApplyExpr func e) =
         do  (funcVal, st) <- eval ctx func
             (argVal, st2) <- eval ctx{store = st} e
             case funcVal of
                 FuncVal ctx2 var body -> eval ctx{store = st2, env = updateEnv var argVal ctx2} body
+                TypedFuncVal ctx2 params retType stmts retExpr ->
+                    case params of
+                        [(paramType, paramVar)] ->
+                            let newEnv = updateEnv paramVar argVal ctx2
+                                newCtx = ctx{store = st2, env = newEnv}
+                            in case evalStmtList newCtx stmts of
+                                Just (finalCtx, _) -> eval finalCtx retExpr
+                                Nothing -> Nothing
+                        _ -> Nothing  -- Multi-parameter functions need different syntax
                 _ -> Nothing
     eval ctx (AssignExpr e1 e2) =
         case eval ctx e1 of
@@ -367,6 +380,16 @@ module Evaluator where
                     Just result -> Just result
                     Nothing -> Nothing  -- No pattern matched
             Nothing -> Nothing
+    eval ctx (ErrorExpr msg) = Just (ErrorVal msg, store ctx)
+    eval ctx (TupleExpr exprs) =
+        case evalExprList ctx exprs of
+            Just (vals, st) -> Just (TupleVal vals, st)
+            Nothing -> Nothing
+    eval ctx (IsErrorExpr expr) =
+        case eval ctx expr of
+            Just (ErrorVal _, st) -> Just (BoolVal True, st)
+            Just (_, st) -> Just (BoolVal False, st)
+            Nothing -> Nothing
 
     forLoop :: Context -> Var -> Expr -> Expr -> Expr -> Maybe (Value, Store)
     forLoop ctx var cond update body =
@@ -398,9 +421,12 @@ module Evaluator where
     showVal NullVal = "null"
     showVal (ArrayVal vals) = "[" ++ (concatMap (\v -> showVal v ++ ", ") vals) ++ "]"
     showVal (FuncVal _ var _) = "function " ++ var
+    showVal (MultiFuncVal _ vars _) = "function (" ++ (concatMap (\v -> v ++ ", ") vars) ++ ")"
     showVal (TypedFuncVal _ _ _ _ _) = "function"
     showVal (ObjectVal className _ _) = "object " ++ className
     showVal (PrintVal s) = s
+    showVal (ErrorVal msg) = "error: " ++ msg
+    showVal (TupleVal vals) = "(" ++ (concatMap (\v -> showVal v ++ ", ") vals) ++ ")"
 
     threadStore :: (Value -> Maybe Value) -> Context -> Expr -> Maybe (Value, Store)
     threadStore f ctx a =

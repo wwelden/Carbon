@@ -81,6 +81,8 @@ import Data.Maybe
     '?'             { QuestionTok }
     ':'             { ColonTok }
     '++'            { IncrementTok }
+    err             { ErrTok }
+    isErr           { IsErrTok }
 
 -- Proper precedence and associativity (lowest to highest)
 %right ';'
@@ -173,6 +175,7 @@ Expr: int                         { IntExpr $1 }
     | typeof '(' Expr ')'         { TypeOfExpr $3 }
     | '[' ExprList ']'            { ArrayExpr $2}
     | var '=>' Expr               { FuncExpr $1 $3 }
+    | '(' VarList ')' '=>' Expr   { MultiFuncExpr $2 $5 }
     | function '(' var ')' '{' return Expr '}' { FunctionExpr $3 $7 }
     | Expr '(' Expr ')'           { ApplyExpr $1 $3 }
     | while '(' Expr ')' '{' Expr '}' { WhileExpr $3 $6 }
@@ -186,6 +189,9 @@ Expr: int                         { IntExpr $1 }
     | Expr '.' len                { ArrayLenExpr $1 }
     | print '(' Expr ')'          { PrintExpr $3 }
     | match Expr '{' MatchCases '}' { MatchExpr $2 $4 }
+    | err '(' string ')'          { ErrorExpr $3 }
+    | '(' ExprList ')'            { TupleExpr $2 }
+    | isErr '(' Expr ')'          { IsErrorExpr $3 }
     | this                        { ThisExpr }
 
 MatchCases : MatchCase               { [$1] }
@@ -207,6 +213,10 @@ Pattern : int                        { LitPat (IntLit $1) }
 PatternList : {- empty -}            { [] }
     | Pattern                        { [$1] }
     | Pattern ',' PatternList        { $1 : $3 }
+
+VarList : {- empty -}                { [] }
+    | var                            { [$1] }
+    | var ',' VarList                { $1 : $3 }
 
 {
 
@@ -266,6 +276,7 @@ data Expr = IntExpr Int
     | TypeOfExpr Expr
     | ArrayExpr [Expr]
     | FuncExpr Var Expr
+    | MultiFuncExpr [Var] Expr
     | FunctionExpr Var Expr
     | ApplyExpr Expr Expr
     | WhileExpr Expr Expr
@@ -282,6 +293,9 @@ data Expr = IntExpr Int
     | ForCStyleExpr Var Expr Expr Expr Expr
     | ForWhileExpr Expr Expr
     | MatchExpr Expr [MatchCase]
+    | ErrorExpr String
+    | TupleExpr [Expr]
+    | IsErrorExpr Expr
     | ThisExpr
     deriving (Show, Eq)
 
