@@ -19,13 +19,20 @@ Carbon is a modern programming language that amalgamates syntax from Go, JavaScr
 - **String Conversion**: `toString(value)`
 - **Print Function**: `print(value)`
 - **Mathematical Constants**: `PI`, `E`, `PHI`, `AVOGADRO`
+- **Pattern Matching**: Haskell-inspired pattern matching with modern syntax
+  - Literal patterns: `match x { 42 => "found", _ => "not found" }`
+  - Variable binding: `match value { x => x * 2 }`
+  - Array destructuring: `match [1,2,3] { [a,b,c] => a+b+c, _ => 0 }`
+  - Mixed patterns: `match [1,x,3] { [1,2,3] => "exact", [1,y,3] => y*10, _ => 0 }`
+  - Boolean/String patterns: `match flag { true => "on", false => "off" }`
+  - Null patterns: `match value { null => "empty", x => "has value" }`
+  - Wildcard patterns: `_` matches anything
 
 ### 🚧 In Development
 
 - Function declarations with type annotations
 - Object-oriented programming (classes, methods)
 - More loop constructs (while, for-range)
-- Pattern matching
 - Error handling
 
 ## Directory Structure
@@ -93,6 +100,11 @@ typeof(message); // "string"
 // Mathematical constants
 PI;             // 3.141592653589793
 E;              // 2.718281828459045
+
+// Pattern matching
+match 42 { 42 => "found", _ => "not found" };  // "found"
+match [1,2,3] { [a,b,c] => a+b+c, _ => 0 };    // 6
+match true { true => "yes", false => "no" };   // "yes"
 ```
 
 ## Language Design
@@ -101,6 +113,7 @@ Carbon combines the best features from multiple languages:
 
 - **Go**: Simple, clean syntax for control flow
 - **JavaScript**: Dynamic typing, arrow functions, array methods
+- **Haskell**: Pattern matching with modern syntax
 - **Rust**: Memory safety concepts (planned)
 - **C#**: Object-oriented features (planned)
 - **Java**: Strong typing system (planned)

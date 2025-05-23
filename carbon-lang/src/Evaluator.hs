@@ -1,6 +1,6 @@
 module Evaluator where
     import qualified Parser as P
-    import Parser (Statement(..), Expr(..), BOp(..), ClassMember(..), Var, ClassName, FieldName, MethodName)
+    import Parser (Statement(..), Expr(..), BOp(..), ClassMember(..), Var, ClassName, FieldName, MethodName, Pattern(..), Literal(..), MatchCase)
     import Debug.Trace
     import Data.Maybe
     import System.IO.Unsafe
@@ -158,6 +158,40 @@ module Evaluator where
         case eval ctx arrayExpr of
             Just (ArrayVal vals, st) -> forInStmtLoop ctx{store = st} var vals stmts
             _ -> Nothing
+
+    -- Pattern matching functions
+    patternMatch :: Pattern -> Value -> Maybe [(Var, Value)]
+    patternMatch (LitPat lit) val =
+        case (lit, val) of
+            (IntLit i, IntVal v) -> if i == v then Just [] else Nothing
+            (RealLit r, DoubleVal v) -> if r == v then Just [] else Nothing
+            (RealLit r, IntVal v) -> if r == fromIntegral v then Just [] else Nothing
+            (IntLit i, DoubleVal v) -> if fromIntegral i == v then Just [] else Nothing
+            (BoolLit b, BoolVal v) -> if b == v then Just [] else Nothing
+            (StringLit s, StringVal v) -> if s == v then Just [] else Nothing
+            (NullLit, NullVal) -> Just []
+            _ -> Nothing
+    patternMatch (VarPat var) val = Just [(var, val)]
+    patternMatch WildcardPat _ = Just []
+    patternMatch (ArrayPat patterns) (ArrayVal values) =
+        if length patterns == length values
+        then foldl combineBindings (Just []) (zipWith patternMatch patterns values)
+        else Nothing
+    patternMatch (ArrayPat _) _ = Nothing
+
+    combineBindings :: Maybe [(Var, Value)] -> Maybe [(Var, Value)] -> Maybe [(Var, Value)]
+    combineBindings Nothing _ = Nothing
+    combineBindings _ Nothing = Nothing
+    combineBindings (Just bindings1) (Just bindings2) = Just (bindings1 ++ bindings2)
+
+    tryMatchCases :: Context -> Value -> [MatchCase] -> Maybe (Value, Store)
+    tryMatchCases ctx _ [] = Nothing
+    tryMatchCases ctx val ((pattern, expr) : cases) =
+        case patternMatch pattern val of
+            Just bindings ->
+                let newEnv = foldl (\env (var, value) -> updateEnv var value env) (env ctx) bindings
+                in eval ctx{env = newEnv} expr
+            Nothing -> tryMatchCases ctx val cases
 
     eval :: Context -> Expr -> Maybe (Value, Store)
     eval ctx (IntExpr i) = Just (IntVal i, store ctx)
@@ -326,6 +360,13 @@ module Evaluator where
             forCStyleLoop ctx{store = st, env = newEnv} var condExpr updateExpr body
     eval ctx (ForWhileExpr condExpr body) =
         forWhileLoop ctx condExpr body
+    eval ctx (MatchExpr expr cases) =
+        case eval ctx expr of
+            Just (val, st) ->
+                case tryMatchCases ctx{store = st} val cases of
+                    Just result -> Just result
+                    Nothing -> Nothing  -- No pattern matched
+            Nothing -> Nothing
 
     forLoop :: Context -> Var -> Expr -> Expr -> Expr -> Maybe (Value, Store)
     forLoop ctx var cond update body =

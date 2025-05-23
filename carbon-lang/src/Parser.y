@@ -65,7 +65,9 @@ import Data.Maybe
     return          { ReturnTok}
     '&'             { RefTok }
     while           { WhileTok }
+    match           { MatchTok }
     '|'             { PipeTok }
+    '_'             { WildcardTok }
 
     cname           { CnameTok $$}
     class           { ClassTok }
@@ -95,7 +97,7 @@ import Data.Maybe
 %right '**'
 %right '!' 'UMINUS'
 %left '(' ')' '[' ']' '.'
-%nonassoc if else for while return function let const in
+%nonassoc if else for while return function let const in match
 
 %%
 Statement: Expr ';'                   {ExprStmt $1}
@@ -183,7 +185,28 @@ Expr: int                         { IntExpr $1 }
     | Expr '.' var                { FieldAccessExpr $1 $3 }
     | Expr '.' len                { ArrayLenExpr $1 }
     | print '(' Expr ')'          { PrintExpr $3 }
+    | match Expr '{' MatchCases '}' { MatchExpr $2 $4 }
     | this                        { ThisExpr }
+
+MatchCases : MatchCase               { [$1] }
+    | MatchCase ',' MatchCases       { $1 : $3 }
+
+MatchCase : Pattern '=>' Expr        { ($1, $3) }
+
+Pattern : int                        { LitPat (IntLit $1) }
+    | real                           { LitPat (RealLit $1) }
+    | true                           { LitPat (BoolLit True) }
+    | false                          { LitPat (BoolLit False) }
+    | string                         { LitPat (StringLit $1) }
+    | null                           { LitPat NullLit }
+    | var                            { VarPat $1 }
+    | '_'                            { WildcardPat }
+    | '[' PatternList ']'            { ArrayPat $2 }
+    | '(' Pattern ')'                { $2 }
+
+PatternList : {- empty -}            { [] }
+    | Pattern                        { [$1] }
+    | Pattern ',' PatternList        { $1 : $3 }
 
 {
 
@@ -191,6 +214,7 @@ type Var = String
 type ClassName = String
 type FieldName = String
 type MethodName = String
+type MatchCase = (Pattern, Expr)
 
 data ClassMember = FieldDecl FieldName
                  | MethodDecl MethodName Var Expr
@@ -206,6 +230,19 @@ data Statement = ExprStmt Expr
     deriving (Show, Eq)
 
 data Type = IntType | BoolType | StringType | ArrayType Type
+    deriving (Show, Eq)
+
+data Pattern = LitPat Literal
+    | VarPat Var
+    | WildcardPat
+    | ArrayPat [Pattern]
+    deriving (Show, Eq)
+
+data Literal = IntLit Int
+    | RealLit Double
+    | BoolLit Bool
+    | StringLit String
+    | NullLit
     deriving (Show, Eq)
 
 data Expr = IntExpr Int
@@ -244,6 +281,7 @@ data Expr = IntExpr Int
     | ForInExpr Var Expr Expr
     | ForCStyleExpr Var Expr Expr Expr Expr
     | ForWhileExpr Expr Expr
+    | MatchExpr Expr [MatchCase]
     | ThisExpr
     deriving (Show, Eq)
 

@@ -59,6 +59,7 @@ $digit+                                 { IntTok .read }
 "return"                                { const ReturnTok}
 "&"                                     { const RefTok }
 "while"                                 { const WhileTok }
+"match"                                 { const MatchTok }
 "|"                                     { const PipeTok }
 "class"                                 { const ClassTok }
 "new"                                   { const NewTok }
@@ -70,6 +71,7 @@ $digit+                                 { IntTok .read }
 "]"                                     { const RBracketTok }
 "?"                                     { const QuestionTok }
 ":"                                     { const ColonTok }
+"_"                                     { const WildcardTok }
 "++"                                    { const IncrementTok }
 
 [A-Z][a-zA-Z0-9]*                       { CnameTok }
@@ -96,10 +98,10 @@ data Token = PlusTok | MinusTok | MultTok | DivTok | ExpTok | ModTok | MathSqrtT
               | FnTok | FunctionTok | ArrowTok | ToStringTok | TypeOfTok
               | PrintTok | IntTypeTok | BoolTypeTok | StringTypeTok | InTok | LenTok
               | CommaTok | ReturnTok
-              | RefTok | WhileTok | PipeTok
+              | RefTok | WhileTok | MatchTok | PipeTok
               | NewTok | DotTok | LBraceTok | RBraceTok | CnameTok String
               | ClassTok | ThisTok
-              | QuestionTok | ColonTok | IncrementTok
+              | QuestionTok | ColonTok | WildcardTok | IncrementTok
               deriving (Show, Eq, Ord)
 
 scanTokens :: String -> Maybe [Token]
