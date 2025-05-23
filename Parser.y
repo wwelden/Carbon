@@ -84,6 +84,7 @@ import Data.Maybe
 %right ';'
 %left '|'
 %left '='
+%right '=>'
 %right '?' ':'
 %right '||'
 %right '&&'
@@ -94,7 +95,7 @@ import Data.Maybe
 %right '**'
 %right '!' 'UMINUS'
 %left '(' ')' '[' ']' '.'
-%nonassoc if else for while return '=>' function let const
+%nonassoc if else for while return function let const
 
 %%
 Statement: Expr ';'                   {ExprStmt $1}
