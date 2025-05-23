@@ -3,6 +3,7 @@ module Evaluator where
     import Parser (Statement(..), Expr(..), BOp(..), ClassMember(..), Var, ClassName, FieldName, MethodName)
     import Debug.Trace
     import Data.Maybe
+    import System.IO.Unsafe
 
     data Value = IntVal Int
                | DoubleVal Double
@@ -306,7 +307,8 @@ module Evaluator where
     eval ctx (PrintExpr e) =
         case eval ctx e of
             Just (val, st) ->
-                let _ = putStrLn (showVal val)  -- This is a side effect in the pure evaluator
+                let output = showVal val
+                    _ = unsafePerformIO (putStrLn output)
                 in Just (NullVal, st)
             _ -> Nothing
     eval ctx (ForInExpr var arrayExpr body) =
