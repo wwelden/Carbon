@@ -1,6 +1,20 @@
 # Carbon Programming Language
 
-Carbon is a modern programming language that amalgamates syntax from Go, JavaScript, Rust, C#, Java, and C. It features a clean, expressive syntax with powerful functional and object-oriented programming capabilities.
+Carbon is a modern programming language that amalgamates syntax from Go, JavaScript, Rust, Haskell, C#, Java, and C. It features clean, expressive syntax with powerful functional programming capabilities including Haskell-inspired pattern matching.
+
+## 🚀 Quick Start
+
+```bash
+# Build Carbon
+make
+
+# Run the REPL
+bin/carbon
+
+# Try pattern matching
+> match 42 { 42 => "Hello Carbon!", _ => "not found" };
+"Hello Carbon!"
+```
 
 ## Features
 
@@ -52,7 +66,20 @@ Carbon/
 From the project root:
 
 ```bash
+# Build Carbon interpreter
 make
+
+# Clean build artifacts
+make clean
+
+# Build and install to bin/
+make install
+
+# Development build with clean
+make dev
+
+# Show build help
+make help
 ```
 
 This will build the Carbon interpreter and place it in `bin/carbon`.
@@ -63,6 +90,21 @@ This will build the Carbon interpreter and place it in `bin/carbon`.
 
 ```bash
 bin/carbon
+```
+
+### Running Examples
+
+Explore the `examples/` directory for comprehensive Carbon code samples:
+
+```bash
+# View available examples
+ls examples/
+
+# Key examples:
+# - pattern_matching.cb    # Comprehensive pattern matching demo
+# - pattern_demo.cb        # Interactive pattern examples
+# - demo.cb               # General language features
+# - test_working_features.cb # All working features
 ```
 
 ### Example Code
@@ -105,35 +147,71 @@ E;              // 2.718281828459045
 match 42 { 42 => "found", _ => "not found" };  // "found"
 match [1,2,3] { [a,b,c] => a+b+c, _ => 0 };    // 6
 match true { true => "yes", false => "no" };   // "yes"
+
+// Complex pattern matching
+match [1, x, 3] {
+    [1, 2, 3] => "exact match",
+    [1, y, 3] => y * 100,  // Binds y=2, returns 200
+    _ => 0
+};
 ```
 
 ## Language Design
 
 Carbon combines the best features from multiple languages:
 
-- **Go**: Simple, clean syntax for control flow
-- **JavaScript**: Dynamic typing, arrow functions, array methods
-- **Haskell**: Pattern matching with modern syntax
-- **Rust**: Memory safety concepts (planned)
+- **Go**: Simple, clean syntax for control flow (`for item in array`)
+- **JavaScript**: Dynamic typing, arrow functions (`x => x + 1`), ternary operator
+- **Rust**: Modern pattern matching syntax (`match value { ... }`)
+- **Haskell**: Pattern matching semantics (destructuring, variable binding)
+- **C/Java**: Basic syntax structure and familiar operators
 - **C#**: Object-oriented features (planned)
-- **Java**: Strong typing system (planned)
 - **C**: Low-level control (planned)
 
 ## Implementation
 
 Carbon is implemented in Haskell using:
-- **Alex** for lexical analysis
-- **Happy** for parsing
-- Custom evaluator with environment-based evaluation
+- **Alex** for lexical analysis (generates `src/Lexer.hs`)
+- **Happy** for parsing (generates `src/Parser.hs`)
+- Custom evaluator with environment-based evaluation (`src/Evaluator.hs`)
+- REPL with error handling (`src/Main.hs`)
+
+**Parser Status**: 76 shift/reduce conflicts (actively being reduced)
 
 ## Contributing
 
 The Carbon language is actively being developed. Current priorities:
 
-1. Reduce parser conflicts (currently 76 shift/reduce conflicts)
-2. Implement function declarations with type annotations
-3. Add object-oriented programming features
-4. Improve error messages and debugging
+1. **Parser Optimization**: Reduce shift/reduce conflicts from 76
+2. **Enhanced Pattern Matching**: Add guards, nested patterns, or expressions
+3. **Function Declarations**: Type annotations and multiple parameters
+4. **Object-Oriented Features**: Classes, inheritance, methods
+5. **Error Handling**: Try/catch mechanisms
+6. **Standard Library**: Built-in functions and utilities
+
+### Development Workflow
+
+```bash
+# Make changes to src/
+# Build and test
+make clean && make
+
+# Test features
+bin/carbon
+> your_test_code_here
+
+# Run examples
+cat examples/pattern_matching.cb | bin/carbon
+```
+
+## Recent Accomplishments
+
+- ✅ **Pattern Matching**: Full implementation with literal, variable, array, and wildcard patterns
+- ✅ **Arrow Functions**: JavaScript-style `x => x + 1` syntax
+- ✅ **For-In Loops**: Go-style `for item in array { ... }`
+- ✅ **Print Function**: Working output with proper null handling
+- ✅ **Clean Architecture**: Organized project structure
+- ✅ **Build System**: Complete Makefile with multiple targets
 
 ## License
 
