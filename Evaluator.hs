@@ -152,6 +152,10 @@ module Evaluator where
     evalStmt ctx (FnDeclStmt name params retType stmts retExpr) =
         let func = TypedFuncVal (env ctx) params retType stmts retExpr
         in Just (ctx{env = updateEnv name func (env ctx)}, NullVal)
+    evalStmt ctx (ForInStmt var arrayExpr stmts) =
+        case eval ctx arrayExpr of
+            Just (ArrayVal vals, st) -> forInStmtLoop ctx{store = st} var vals stmts
+            _ -> Nothing
 
     eval :: Context -> Expr -> Maybe (Value, Store)
     eval ctx (IntExpr i) = Just (IntVal i, store ctx)
@@ -400,3 +404,19 @@ module Evaluator where
                     _ -> Nothing
             Just (BoolVal False, st) -> Just (NullVal, st)
             _ -> Nothing
+
+    forInStmtLoop :: Context -> Var -> [Value] -> [Statement] -> Maybe (Context, Value)
+    forInStmtLoop ctx var [] stmts = Just (ctx, NullVal)
+    forInStmtLoop ctx var (v:vs) stmts =
+        let newEnv = updateEnv var v (env ctx)
+            newCtx = ctx{env = newEnv}
+        in case evalStmtList newCtx stmts of
+            Just (ctx2, _) -> forInStmtLoop ctx2 var vs stmts
+            Nothing -> Nothing
+
+    evalStmtList :: Context -> [Statement] -> Maybe (Context, Value)
+    evalStmtList ctx [] = Just (ctx, NullVal)
+    evalStmtList ctx (s:ss) =
+        case evalStmt ctx s of
+            Just (newCtx, _) -> evalStmtList newCtx ss
+            Nothing -> Nothing

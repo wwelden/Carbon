@@ -95,7 +95,7 @@ import Data.Maybe
 %right '**'
 %right '!' 'UMINUS'
 %left '(' ')' '[' ']' '.'
-%nonassoc if else for while return function let const
+%nonassoc if else for while return function let const in
 
 %%
 Statement: Expr ';'                   {ExprStmt $1}
@@ -104,6 +104,7 @@ Statement: Expr ';'                   {ExprStmt $1}
     | class cname '{' ClassMembers '}' {ClassStmt $2 $4}
     | TypeDecl var '=' Expr           {TypedVarStmt $1 $2 $4}
     | fn var '(' ParamList ')' Type '{' StmtList return Expr '}' {FnDeclStmt $2 $4 $6 $8 $10}
+    | for var in Expr '{' StmtList '}' {ForInStmt $2 $4 $6}
 
 ExprList : {- empty -}                { [] }
     | Expr                            {[$1]}
@@ -201,6 +202,7 @@ data Statement = ExprStmt Expr
     | ClassStmt ClassName [ClassMember]
     | TypedVarStmt Type Var Expr
     | FnDeclStmt Var [(Type, Var)] Type [Statement] Expr
+    | ForInStmt Var Expr [Statement]
     deriving (Show, Eq)
 
 data Type = IntType | BoolType | StringType | ArrayType Type
