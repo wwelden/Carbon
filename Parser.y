@@ -80,10 +80,11 @@ import Data.Maybe
     ':'             { ColonTok }
     '++'            { IncrementTok }
 
-%nonassoc for else '=>' while return
-%left '|' ';'
+-- Proper precedence and associativity (lowest to highest)
+%right ';'
+%left '|'
 %left '='
-%right '?'
+%right '?' ':'
 %right '||'
 %right '&&'
 %left '==' '!='
@@ -91,9 +92,9 @@ import Data.Maybe
 %left '+' '-'
 %left '*' '/' '%'
 %right '**'
-%nonassoc 'UMINUS'
-%nonassoc 'Math.sqrt'
-%right '('
+%right '!' 'UMINUS'
+%left '(' ')' '[' ']' '.'
+%nonassoc if else for while return '=>' function let const
 
 %%
 Statement: Expr ';'                   {ExprStmt $1}
