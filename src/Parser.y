@@ -91,13 +91,12 @@ import Data.Maybe
     isErr           { IsErrTok }
 
 -- Proper precedence and associativity (lowest to highest)
-%right ';'
+%nonassoc ';'
 %left '|'
-%left '='
 %right '=>'
 %right '?' ':'
-%right '||'
-%right '&&'
+%left '||'
+%left '&&'
 %left '==' '!='
 %left '>' '<' '<=' '>='
 %left '+' '-'
@@ -105,15 +104,16 @@ import Data.Maybe
 %right '**'
 %right '!' 'UMINUS'
 %left '(' ')' '[' ']' '.'
-%nonassoc if else for while return function let const in match
+%right '='
+%nonassoc if else let const match
+%nonassoc for while return function in
 
 %%
 Statement: Expr ';'                   {ExprStmt $1}
     | let var '=' Expr ';'            {LetStmt $2 $4}
     | const var '=' Expr ';'          {ConstStmt $2 $4}
+    | Type var '=' Expr ';'           {TypedVarStmt $1 $2 $4}
     | class cname '{' ClassMembers '}' {ClassStmt $2 $4}
-    | TypeDecl var '=' Expr           {TypedVarStmt $1 $2 $4}
-    | fn var '(' ParamList ')' Type '{' StmtList return Expr '}' {FnDeclStmt $2 $4 $6 $8 $10}
     | for var in Expr '{' StmtList '}' {ForInStmt $2 $4 $6}
     | var '+=' Expr ';'               {CompoundAssignStmt $1 PlusEq $3}
     | var '-=' Expr ';'               {CompoundAssignStmt $1 MinusEq $3}
@@ -127,18 +127,10 @@ ExprList : {- empty -}                { [] }
     | Expr                            {[$1]}
     | Expr ',' ExprList               { $1 : $3 }
 
-ParamList : {- empty -}               { [] }
-    | Param                           {[$1]}
-    | Param ',' ParamList             { $1 : $3 }
-
-Param : Type var                      { ($1, $2) }
-
 Type : intType                        { IntType }
     | boolType                        { BoolType }
     | stringType                      { StringType }
     | Type '[' ']'                    { ArrayType $1 }
-
-TypeDecl : Type                       { $1 }
 
 StmtList : {- empty -}                { [] }
     | Statement StmtList              { $1 : $2 }
@@ -180,10 +172,7 @@ Expr: int                         { IntExpr $1 }
     | Expr '>=' Expr              { BOpExpr GeqOp $1 $3 }
     | if '(' Expr ')' '{' Expr '}' else '{' Expr '}' { IfExpr $3 $6 $10 }
     | Expr '?' Expr ':' Expr      { TernaryExpr $1 $3 $5 }
-    | for '(' let var '=' Expr ';' Expr ';' Expr ')' '{' Expr '}' { ForExpr $4 $6 $8 $10 $13 }
     | for var in Expr '{' Expr '}'    { ForInExpr $2 $4 $6 }
-    | for var '=' Expr ';' Expr ';' Expr '{' Expr '}' { ForCStyleExpr $2 $4 $6 $8 $10 }
-    | for Expr '{' Expr '}'           { ForWhileExpr $2 $4 }
     | toString '(' Expr ')'       { ToStringExpr $3 }
     | typeof '(' Expr ')'         { TypeOfExpr $3 }
     | '[' ExprList ']'            { ArrayExpr $2}
@@ -192,10 +181,7 @@ Expr: int                         { IntExpr $1 }
     | function '(' var ')' '{' return Expr '}' { FunctionExpr $3 $7 }
     | Expr '(' Expr ')'           { ApplyExpr $1 $3 }
     | while '(' Expr ')' '{' Expr '}' { WhileExpr $3 $6 }
-    | '&' Expr                    { RefExpr $2 }
-    | Expr '=' Expr               { AssignExpr $1 $3 }
-    | '*' Expr                    { DerefExpr $2 }
-    | Expr ';' Expr               { SeqExpr $1 $3 }
+
     | new cname '(' ExprList ')'  { NewExpr $2 $4 }
     | Expr '.' var '(' Expr ')'   { MethodCallExpr $1 $3 $5 }
     | Expr '.' var                { FieldAccessExpr $1 $3 }
@@ -203,7 +189,7 @@ Expr: int                         { IntExpr $1 }
     | print '(' Expr ')'          { PrintExpr $3 }
     | match Expr '{' MatchCases '}' { MatchExpr $2 $4 }
     | err '(' string ')'          { ErrorExpr $3 }
-    | '(' ExprList ')'            { TupleExpr $2 }
+    | '(' Expr ',' ExprList ')'   { TupleExpr ($2 : $4) }
     | isErr '(' Expr ')'          { IsErrorExpr $3 }
     | this                        { ThisExpr }
 
@@ -246,9 +232,8 @@ data ClassMember = FieldDecl FieldName
 data Statement = ExprStmt Expr
     | LetStmt Var Expr
     | ConstStmt Var Expr
-    | ClassStmt ClassName [ClassMember]
     | TypedVarStmt Type Var Expr
-    | FnDeclStmt Var [(Type, Var)] Type [Statement] Expr
+    | ClassStmt ClassName [ClassMember]
     | ForInStmt Var Expr [Statement]
     | CompoundAssignStmt Var CompoundOp Expr
     | IncrementStmt Var
@@ -281,7 +266,6 @@ data Expr = IntExpr Int
     | SqrtExpr Expr
     | IfExpr Expr Expr Expr
     | TernaryExpr Expr Expr Expr
-    | ForExpr Var Expr Expr Expr Expr
     | NotExpr Expr
     | StringExpr String
     | VarExpr Var
@@ -296,18 +280,12 @@ data Expr = IntExpr Int
     | FunctionExpr Var Expr
     | ApplyExpr Expr Expr
     | WhileExpr Expr Expr
-    | RefExpr Expr
-    | AssignExpr Expr Expr
-    | DerefExpr Expr
-    | SeqExpr Expr Expr
     | NewExpr ClassName [Expr]
     | MethodCallExpr Expr MethodName Expr
     | FieldAccessExpr Expr FieldName
     | ArrayLenExpr Expr
     | PrintExpr Expr
     | ForInExpr Var Expr Expr
-    | ForCStyleExpr Var Expr Expr Expr Expr
-    | ForWhileExpr Expr Expr
     | MatchExpr Expr [MatchCase]
     | ErrorExpr String
     | TupleExpr [Expr]

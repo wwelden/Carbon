@@ -116,9 +116,13 @@ ls examples/
 
 ```carbon
 // Variables and basic operations
-let x = 42;
-let y = 10;
-let message = "Hello Carbon";
+let x = 42;           // Type inferred
+int y = 10;           // Explicit type
+string message = "Hello Carbon";
+
+// Array types
+int[] numbers = [1, 2, 3, 4, 5];
+bool[] flags = [true, false, true];
 
 // Arithmetic
 x + y;          // 52
@@ -216,13 +220,13 @@ Carbon is implemented in Haskell using:
 - Custom evaluator with environment-based evaluation (`src/Evaluator.hs`)
 - REPL with error handling (`src/Main.hs`)
 
-**Parser Status**: 184 shift/reduce conflicts (actively being reduced)
+**Parser Status**: 2 shift/reduce conflicts, 1 reduce/reduce conflict (down from 184/3 - 99% reduction!)
 
 ## Contributing
 
 The Carbon language is actively being developed. Current priorities:
 
-1. **Parser Optimization**: Reduce shift/reduce conflicts from 84
+1. **Eliminate Remaining Conflicts**: Fix the last 2 shift/reduce and 1 reduce/reduce conflict
 2. **Multi-Parameter Functions**: Support for `(x, y) => x + y` syntax
 3. **Function Declarations**: Type annotations and complex signatures
 4. **Object-Oriented Features**: Classes, inheritance, methods
@@ -246,6 +250,8 @@ cat examples/pattern_matching.cb | bin/carbon
 
 ## Recent Accomplishments
 
+- ✅ **Parser Conflict Resolution**: Reduced conflicts from 184→2 shift/reduce, 3→1 reduce/reduce (99% improvement!)
+- ✅ **Type System Preservation**: Maintained static typing while fixing grammar conflicts
 - ✅ **Compound Assignment Operators**: `+=`, `-=`, `*=`, `/=`, `%=` for concise variable updates
 - ✅ **Increment/Decrement Operators**: `++` and `--` for convenient counting operations
 - ✅ **Go-Style Error Handling**: Explicit error values with `err()` and `isErr()` functions

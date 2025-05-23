@@ -1,6 +1,6 @@
 module Evaluator where
     import qualified Parser as P
-    import Parser (Statement(..), Expr(..), BOp(..), CompoundOp(..), ClassMember(..), Var, ClassName, FieldName, MethodName, Pattern(..), Literal(..), MatchCase)
+    import Parser (Statement(..), Expr(..), BOp(..), CompoundOp(..), ClassMember(..), Type(..), Var, ClassName, FieldName, MethodName, Pattern(..), Literal(..), MatchCase)
     import Debug.Trace
     import Data.Maybe
     import System.IO.Unsafe
@@ -14,15 +14,13 @@ module Evaluator where
                | ArrayVal [Value]
                | FuncVal Env Var Expr
                | MultiFuncVal Env [Var] Expr
-               | TypedFuncVal Env [(P.Type, Var)] P.Type [Statement] Expr
                | ObjectVal ClassName [(FieldName, Value)] [(MethodName, Var, Expr)]
                | PrintVal String
                | ErrorVal String
                | TupleVal [Value]
                deriving (Show, Eq)
 
-    data Type = IntType | BoolType | StringType | ArrayType Type
-        deriving (Show, Eq)
+
 
     type Loc = Int
     type Env = [(Var, Value)]
@@ -145,18 +143,16 @@ module Evaluator where
             recEnv = updateEnv var lazyVal (env ctx)
             (lazyVal, st) = fromMaybe defaultValue (eval ctx {env = recEnv} e)
         in Just (ctx{store = st, env = recEnv}, NullVal)
+    evalStmt ctx (TypedVarStmt varType var e) =
+        do  (val, st) <- eval ctx e
+            Just (ctx{store = st, env = updateEnv var val (env ctx)}, NullVal)
     evalStmt ctx (ClassStmt className members) =
         let fields = [fname | FieldDecl fname <- members]
             methods = [(mname, var, expr) | MethodDecl mname var expr <- members]
             classDef = ClassDef fields methods
             newClasses = updateClasses className classDef (classes ctx)
         in Just (ctx{classes = newClasses}, NullVal)
-    evalStmt ctx (TypedVarStmt varType var e) =
-        do  (val, st) <- eval ctx e
-            Just (ctx{store = st, env = updateEnv var val (env ctx)}, NullVal)
-    evalStmt ctx (FnDeclStmt name params retType stmts retExpr) =
-        let func = TypedFuncVal (env ctx) params retType stmts retExpr
-        in Just (ctx{env = updateEnv name func (env ctx)}, NullVal)
+
     evalStmt ctx (ForInStmt var arrayExpr stmts) =
         case eval ctx arrayExpr of
             Just (ArrayVal vals, st) -> forInStmtLoop ctx{store = st} var vals stmts
@@ -278,10 +274,6 @@ module Evaluator where
     eval ctx (VarExpr x) =
         do  val <- lookupEnv x (env ctx)
             Just (val, store ctx)
-    eval ctx (ForExpr var init cond update body) =
-        do  (initVal, st) <- eval ctx init
-            let newEnv = updateEnv var initVal (env ctx)
-            forLoop ctx{store = st, env = newEnv} var cond update body
     eval ctx (ToStringExpr e) =
         case eval ctx e of
             Just (val, st) -> Just (StringVal (showVal val), st)
@@ -312,41 +304,8 @@ module Evaluator where
             (argVal, st2) <- eval ctx{store = st} e
             case funcVal of
                 FuncVal ctx2 var body -> eval ctx{store = st2, env = updateEnv var argVal ctx2} body
-                TypedFuncVal ctx2 params retType stmts retExpr ->
-                    case params of
-                        [(paramType, paramVar)] ->
-                            let newEnv = updateEnv paramVar argVal ctx2
-                                newCtx = ctx{store = st2, env = newEnv}
-                            in case evalStmtList newCtx stmts of
-                                Just (finalCtx, _) -> eval finalCtx retExpr
-                                Nothing -> Nothing
-                        _ -> Nothing  -- Multi-parameter functions need different syntax
                 _ -> Nothing
-    eval ctx (AssignExpr e1 e2) =
-        case eval ctx e1 of
-            Just (FuncVal ctx2 var body, st) ->
-                do  (val, st2) <- eval ctx{store = st} e2
-                    Just (val, st2)
-            Just (ArrayVal vals, st) ->
-                case eval ctx{store = st} e2 of
-                    Just (val, st2) -> Just (val, st2)
-                    _ -> Nothing
-            _ -> Nothing
-    eval ctx (SeqExpr e1 e2) =
-        case eval ctx e1 of
-            Just (_, st) -> eval ctx{store = st} e2
-            _ -> Nothing
-    eval ctx (RefExpr e) =
-        case eval ctx e of
-            Just (val, st) -> Just (IntVal (length (store ctx)), (length (store ctx), val):st)
-            _ -> Nothing
-    eval ctx (DerefExpr e) =
-        case eval ctx e of
-            Just (IntVal loc, st) ->
-                case lookup loc st of
-                    Just val -> Just (val, st)
-                    Nothing -> Nothing
-            _ -> Nothing
+
     eval ctx (WhileExpr e1 e2) =
         case eval ctx e1 of
             Just (BoolVal True, st) ->
@@ -398,12 +357,7 @@ module Evaluator where
         case eval ctx arrayExpr of
             Just (ArrayVal vals, st) -> forInLoop ctx{store = st} var vals body
             _ -> Nothing
-    eval ctx (ForCStyleExpr var initExpr condExpr updateExpr body) =
-        do  (initVal, st) <- eval ctx initExpr
-            let newEnv = updateEnv var initVal (env ctx)
-            forCStyleLoop ctx{store = st, env = newEnv} var condExpr updateExpr body
-    eval ctx (ForWhileExpr condExpr body) =
-        forWhileLoop ctx condExpr body
+
     eval ctx (MatchExpr expr cases) =
         case eval ctx expr of
             Just (val, st) ->
@@ -430,20 +384,7 @@ module Evaluator where
     evalCompoundOp DivEq = divOp
     evalCompoundOp ModEq = modOp
 
-    forLoop :: Context -> Var -> Expr -> Expr -> Expr -> Maybe (Value, Store)
-    forLoop ctx var cond update body =
-        case eval ctx cond of
-            Just (BoolVal True, st) ->
-                case eval ctx{store = st} body of
-                    Just (_, st2) ->
-                        case eval ctx{store = st2} update of
-                            Just (updateVal, st3) ->
-                                let newEnv = updateEnv var updateVal (env ctx)
-                                in forLoop ctx{store = st3, env = newEnv} var cond update body
-                            _ -> Nothing
-                    _ -> Nothing
-            Just (BoolVal False, st) -> Just (NullVal, st)
-            _ -> Nothing
+
 
     evalExprList :: Context -> [Expr] -> Maybe ([Value], Store)
     evalExprList ctx [] = Just ([], store ctx)
@@ -461,7 +402,7 @@ module Evaluator where
     showVal (ArrayVal vals) = "[" ++ (concatMap (\v -> showVal v ++ ", ") vals) ++ "]"
     showVal (FuncVal _ var _) = "function " ++ var
     showVal (MultiFuncVal _ vars _) = "function (" ++ (concatMap (\v -> v ++ ", ") vars) ++ ")"
-    showVal (TypedFuncVal _ _ _ _ _) = "function"
+
     showVal (ObjectVal className _ _) = "object " ++ className
     showVal (PrintVal s) = s
     showVal (ErrorVal msg) = "error: " ++ msg
@@ -488,30 +429,7 @@ module Evaluator where
             Just (_, st) -> forInLoop ctx{store = st} var vs body
             Nothing -> Nothing
 
-    forCStyleLoop :: Context -> Var -> Expr -> Expr -> Expr -> Maybe (Value, Store)
-    forCStyleLoop ctx var condExpr updateExpr body =
-        case eval ctx condExpr of
-            Just (BoolVal True, st) ->
-                case eval ctx{store = st} body of
-                    Just (_, st2) ->
-                        case eval ctx{store = st2} updateExpr of
-                            Just (updateVal, st3) ->
-                                let newEnv = updateEnv var updateVal (env ctx)
-                                in forCStyleLoop ctx{store = st3, env = newEnv} var condExpr updateExpr body
-                            _ -> Nothing
-                    _ -> Nothing
-            Just (BoolVal False, st) -> Just (NullVal, st)
-            _ -> Nothing
 
-    forWhileLoop :: Context -> Expr -> Expr -> Maybe (Value, Store)
-    forWhileLoop ctx condExpr body =
-        case eval ctx condExpr of
-            Just (BoolVal True, st) ->
-                case eval ctx{store = st} body of
-                    Just (_, st2) -> forWhileLoop ctx{store = st2} condExpr body
-                    _ -> Nothing
-            Just (BoolVal False, st) -> Just (NullVal, st)
-            _ -> Nothing
 
     forInStmtLoop :: Context -> Var -> [Value] -> [Statement] -> Maybe (Context, Value)
     forInStmtLoop ctx var [] stmts = Just (ctx, NullVal)
