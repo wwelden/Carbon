@@ -1,0 +1,11 @@
+let double = (x) => x * 2;
+double(21);
+
+let abs = (x) => {
+    if (x >= 0) { x } else { -x }
+};
+abs(-5);
+
+let applyTwice = (f) => (x) => f(f(x));
+let addOne = (x) => x + 1;
+applyTwice(addOne)(5);
