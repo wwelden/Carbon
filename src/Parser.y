@@ -106,13 +106,14 @@ import Data.Maybe
 %left '(' ')' '[' ']' '.'
 %right '='
 %nonassoc if else let const match
-%nonassoc for while return function in
+%nonassoc for while return function fn in
 
 %%
 Statement: Expr ';'                   {ExprStmt $1}
     | let var '=' Expr ';'            {LetStmt $2 $4}
     | const var '=' Expr ';'          {ConstStmt $2 $4}
     | Type var '=' Expr ';'           {TypedVarStmt $1 $2 $4}
+    | fn var '(' ParamList ')' '{' StmtList '}' {FnDeclStmt $2 $4 Nothing $7 (VarExpr "null")}
     | class cname '{' ClassMembers '}' {ClassStmt $2 $4}
     | for var in Expr '{' StmtList '}' {ForInStmt $2 $4 $6}
     | var '+=' Expr ';'               {CompoundAssignStmt $1 PlusEq $3}
@@ -122,6 +123,7 @@ Statement: Expr ';'                   {ExprStmt $1}
     | var '%=' Expr ';'               {CompoundAssignStmt $1 ModEq $3}
     | var '++' ';'                    {IncrementStmt $1}
     | var '--' ';'                    {DecrementStmt $1}
+    | return Expr ';'                 {ReturnStmt $2}
 
 ExprList : {- empty -}                { [] }
     | Expr                            {[$1]}
@@ -131,6 +133,12 @@ Type : intType                        { IntType }
     | boolType                        { BoolType }
     | stringType                      { StringType }
     | Type '[' ']'                    { ArrayType $1 }
+
+ParamList : {- empty -}               { [] }
+    | Param                           { [$1] }
+    | Param ',' ParamList             { $1 : $3 }
+
+Param : Type var                      { ($1, $2) }
 
 StmtList : {- empty -}                { [] }
     | Statement StmtList              { $1 : $2 }
@@ -177,7 +185,6 @@ Expr: int                         { IntExpr $1 }
     | typeof '(' Expr ')'         { TypeOfExpr $3 }
     | '[' ExprList ']'            { ArrayExpr $2}
     | var '=>' Expr               { FuncExpr $1 $3 }
-    | '(' VarList ')' '=>' Expr   { MultiFuncExpr $2 $5 }
     | function '(' var ')' '{' return Expr '}' { FunctionExpr $3 $7 }
     | Expr '(' Expr ')'           { ApplyExpr $1 $3 }
     | while '(' Expr ')' '{' Expr '}' { WhileExpr $3 $6 }
@@ -213,10 +220,6 @@ PatternList : {- empty -}            { [] }
     | Pattern                        { [$1] }
     | Pattern ',' PatternList        { $1 : $3 }
 
-VarList : {- empty -}                { [] }
-    | var                            { [$1] }
-    | var ',' VarList                { $1 : $3 }
-
 {
 
 type Var = String
@@ -233,11 +236,13 @@ data Statement = ExprStmt Expr
     | LetStmt Var Expr
     | ConstStmt Var Expr
     | TypedVarStmt Type Var Expr
+    | FnDeclStmt Var [(Type, Var)] (Maybe Type) [Statement] Expr
     | ClassStmt ClassName [ClassMember]
     | ForInStmt Var Expr [Statement]
     | CompoundAssignStmt Var CompoundOp Expr
     | IncrementStmt Var
     | DecrementStmt Var
+    | ReturnStmt Expr
     deriving (Show, Eq)
 
 data Type = IntType | BoolType | StringType | ArrayType Type
@@ -276,7 +281,7 @@ data Expr = IntExpr Int
     | TypeOfExpr Expr
     | ArrayExpr [Expr]
     | FuncExpr Var Expr
-    | MultiFuncExpr [Var] Expr
+
     | FunctionExpr Var Expr
     | ApplyExpr Expr Expr
     | WhileExpr Expr Expr

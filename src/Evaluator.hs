@@ -13,7 +13,8 @@ module Evaluator where
                | NullVal
                | ArrayVal [Value]
                | FuncVal Env Var Expr
-               | MultiFuncVal Env [Var] Expr
+
+               | TypedFuncVal Env [(Type, Var)] (Maybe Type) [Statement] Expr
                | ObjectVal ClassName [(FieldName, Value)] [(MethodName, Var, Expr)]
                | PrintVal String
                | ErrorVal String
@@ -146,6 +147,9 @@ module Evaluator where
     evalStmt ctx (TypedVarStmt varType var e) =
         do  (val, st) <- eval ctx e
             Just (ctx{store = st, env = updateEnv var val (env ctx)}, NullVal)
+    evalStmt ctx (FnDeclStmt name params retType stmts retExpr) =
+        let func = TypedFuncVal (env ctx) params retType stmts retExpr
+        in Just (ctx{env = updateEnv name func (env ctx)}, NullVal)
     evalStmt ctx (ClassStmt className members) =
         let fields = [fname | FieldDecl fname <- members]
             methods = [(mname, var, expr) | MethodDecl mname var expr <- members]
@@ -188,6 +192,10 @@ module Evaluator where
                     newEnv = updateEnv var newVal (env ctx)
                 in Just (ctx{env = newEnv}, newVal)
             _ -> Nothing
+    evalStmt ctx (ReturnStmt expr) =
+        case eval ctx expr of
+            Just (val, st) -> Just (ctx{store = st}, val)
+            Nothing -> Nothing
 
     -- Pattern matching functions
     patternMatch :: Pattern -> Value -> Maybe [(Var, Value)]
@@ -297,13 +305,22 @@ module Evaluator where
             Just (BoolVal b, st) -> Just (BoolVal (not b), st)
             _ -> Nothing
     eval ctx (FuncExpr var e) = Just (FuncVal (env ctx) var e, store ctx)
-    eval ctx (MultiFuncExpr vars e) = Just (MultiFuncVal (env ctx) vars e, store ctx)
+
     eval ctx (FunctionExpr var e) = Just (FuncVal (env ctx) var e, store ctx)
     eval ctx (ApplyExpr func e) =
         do  (funcVal, st) <- eval ctx func
             (argVal, st2) <- eval ctx{store = st} e
             case funcVal of
                 FuncVal ctx2 var body -> eval ctx{store = st2, env = updateEnv var argVal ctx2} body
+                TypedFuncVal ctx2 params retType stmts retExpr ->
+                    case params of
+                        [(paramType, paramVar)] ->
+                            let newEnv = updateEnv paramVar argVal ctx2
+                                newCtx = ctx{store = st2, env = newEnv}
+                            in case evalStmtList newCtx stmts of
+                                Just (finalCtx, _) -> eval finalCtx retExpr
+                                Nothing -> Nothing
+                        _ -> Nothing  -- Multi-parameter functions need different syntax
                 _ -> Nothing
 
     eval ctx (WhileExpr e1 e2) =
@@ -401,8 +418,8 @@ module Evaluator where
     showVal NullVal = "null"
     showVal (ArrayVal vals) = "[" ++ (concatMap (\v -> showVal v ++ ", ") vals) ++ "]"
     showVal (FuncVal _ var _) = "function " ++ var
-    showVal (MultiFuncVal _ vars _) = "function (" ++ (concatMap (\v -> v ++ ", ") vars) ++ ")"
 
+    showVal (TypedFuncVal _ _ _ _ _) = "function"
     showVal (ObjectVal className _ _) = "object " ++ className
     showVal (PrintVal s) = s
     showVal (ErrorVal msg) = "error: " ++ msg
