@@ -25,6 +25,7 @@ bin/carbon
 - **Comparison Operations**: `==`, `!=`, `>`, `<`, `>=`, `<=`
 - **Boolean Operations**: `&&`, `||`, `!`
 - **Variable Declarations**: `let` and `const` (JavaScript style)
+- **If Expressions**: `if condition { then_value } else { else_value }` (Go/Python style - no parentheses!)
 - **Ternary Operator**: `condition ? value1 : value2` (C/JavaScript style)
 - **Arrow Functions**: `x => x + 1` (JavaScript style)
 - **For-In Loops**: `for item in array { ... }` (Go style)
@@ -140,6 +141,10 @@ x--;            // x = 6
 // Comparisons and ternary
 x > y ? "greater" : "lesser";  // "greater"
 
+// If expressions (no parentheses needed!)
+let result = if x > y { "x wins" } else { "y wins" };
+let nested = if x > 0 { if y > 0 { "both positive" } else { "mixed" } } else { "x negative" };
+
 // Arrays
 let numbers = [1, 2, 3, 4, 5];
 numbers.len;    // 5
@@ -250,6 +255,7 @@ cat examples/pattern_matching.cb | bin/carbon
 
 ## Recent Accomplishments
 
+- ✅ **Clean If Syntax**: Removed parentheses requirement - `if condition { ... } else { ... }` (Go/Python style)
 - ✅ **Parser Conflict Resolution**: Reduced conflicts from 184→2 shift/reduce, 3→1 reduce/reduce (99% improvement!)
 - ✅ **Type System Preservation**: Maintained static typing while fixing grammar conflicts
 - ✅ **Compound Assignment Operators**: `+=`, `-=`, `*=`, `/=`, `%=` for concise variable updates

@@ -170,7 +170,7 @@ Expr: int                         { IntExpr $1 }
     | Expr '||' Expr              { BOpExpr OrOp $1 $3 }
     | Expr '<=' Expr              { BOpExpr LeqOp $1 $3 }
     | Expr '>=' Expr              { BOpExpr GeqOp $1 $3 }
-    | if '(' Expr ')' '{' Expr '}' else '{' Expr '}' { IfExpr $3 $6 $10 }
+    | if Expr '{' Expr '}' else '{' Expr '}' { IfExpr $2 $4 $8 }
     | Expr '?' Expr ':' Expr      { TernaryExpr $1 $3 $5 }
     | for var in Expr '{' Expr '}'    { ForInExpr $2 $4 $6 }
     | toString '(' Expr ')'       { ToStringExpr $3 }
