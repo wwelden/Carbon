@@ -2,8 +2,10 @@ module Main where
 import Lexer
 import Parser
 import Evaluator
+import Evaluator (Value(..))
 import System.IO
 import Control.Monad
+import Control.Exception (catch, IOException)
 
 main :: IO ()
 main = do
@@ -15,10 +17,13 @@ repl :: Context -> IO ()
 repl ctx = do
     putStr "> "
     hFlush stdout
-    input <- getLine
-    if input == "quit"
-        then putStrLn "Goodbye!"
-        else do
+    result <- catch (Just <$> getLine) (\(_ :: IOException) -> return Nothing)
+    case result of
+        Nothing -> putStrLn "\nGoodbye!"
+        Just input ->
+            if input == "quit"
+                then putStrLn "Goodbye!"
+                else do
             case scanTokens input of
                 Nothing -> do
                     putStrLn "Lexer error"
@@ -34,5 +39,9 @@ repl ctx = do
                                     putStrLn "Runtime error"
                                     repl ctx
                                 Just (newCtx, val) -> do
-                                    putStrLn $ showVal val
+                                    case val of
+                                        PrintVal output -> do
+                                            putStrLn output
+                                            putStrLn "null"
+                                        _ -> putStrLn $ showVal val
                                     repl newCtx

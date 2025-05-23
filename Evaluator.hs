@@ -4,6 +4,7 @@ module Evaluator where
     import Debug.Trace
     import Data.Maybe
     import System.IO.Unsafe
+    import System.IO (hFlush, stdout)
 
     data Value = IntVal Int
                | DoubleVal Double
@@ -14,6 +15,7 @@ module Evaluator where
                | FuncVal Env Var Expr
                | TypedFuncVal Env [(P.Type, Var)] P.Type [Statement] Expr
                | ObjectVal ClassName [(FieldName, Value)] [(MethodName, Var, Expr)]
+               | PrintVal String
                deriving (Show, Eq)
 
     data Type = IntType | BoolType | StringType | ArrayType Type
@@ -312,8 +314,7 @@ module Evaluator where
         case eval ctx e of
             Just (val, st) ->
                 let output = showVal val
-                    _ = unsafePerformIO (putStrLn output)
-                in Just (NullVal, st)
+                in Just (PrintVal output, st)
             _ -> Nothing
     eval ctx (ForInExpr var arrayExpr body) =
         case eval ctx arrayExpr of
@@ -358,6 +359,7 @@ module Evaluator where
     showVal (FuncVal _ var _) = "function " ++ var
     showVal (TypedFuncVal _ _ _ _ _) = "function"
     showVal (ObjectVal className _ _) = "object " ++ className
+    showVal (PrintVal s) = s
 
     threadStore :: (Value -> Maybe Value) -> Context -> Expr -> Maybe (Value, Store)
     threadStore f ctx a =
