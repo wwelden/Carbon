@@ -1,0 +1,27 @@
+// Simple Demo: Automatic Getters, Setters, and Init Methods
+
+print("Automatic Method Generation Demo")
+
+class Person {
+    name
+    age
+}
+
+let person = new Person()
+
+// Test getters
+print("Getters:")
+print("getName: " + toString(person.getName()))
+print("getAge: " + toString(person.getAge()))
+
+// Test setters
+print("Setters:")
+print("setName result: " + toString(person.setName("Alice")))
+print("setAge result: " + toString(person.setAge(30)))
+
+// Test init
+print("Init:")
+let person2 = new Person()
+print("init result: " + typeof(person2.init("Bob")))
+
+print("Demo completed successfully!")

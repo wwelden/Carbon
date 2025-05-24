@@ -1,0 +1,43 @@
+// Test automatic getters, setters, and init methods
+// These methods should be generated automatically when a class is defined
+
+class Person {
+    name
+    age
+}
+
+// Test that automatic methods are generated
+let person = new Person()
+
+// Test automatic getter methods - call them to see if they exist
+print("Testing automatic getters:")
+print("Calling getName(): " + toString(person.getName()))
+print("Calling getAge(): " + toString(person.getAge()))
+
+// Test automatic setter methods
+print("Testing automatic setters:")
+print("Calling setName('John'): " + toString(person.setName("John")))
+print("Calling setAge(25): " + toString(person.setAge(25)))
+
+// Test automatic init method
+print("Testing automatic init:")
+print("Calling init('Alice'): " + toString(person.init("Alice")))
+
+// Test a more complex class with multiple fields
+class Car {
+    make
+    model
+    year
+    color
+}
+
+let car = new Car()
+
+// Test some automatic methods
+print("Car automatic methods:")
+print("getMake(): " + toString(car.getMake()))
+print("setMake('Toyota'): " + toString(car.setMake("Toyota")))
+print("getModel(): " + toString(car.getModel()))
+print("init('Honda'): " + toString(car.init("Honda")))
+
+print("Automatic method generation test completed!")

@@ -408,7 +408,8 @@ impl Parser {
                         // Traditional single-argument method call
                         expr = Expr::MethodCallExpr(Box::new(expr), method_name, Box::new(args[0].clone()));
                     } else if args.is_empty() {
-                        return Err(self.error("Method calls require at least one argument"));
+                        // Zero-argument method call - use NullExpr as placeholder argument
+                        expr = Expr::MethodCallExpr(Box::new(expr), method_name, Box::new(Expr::NullExpr));
                     } else {
                         return Err(self.error("Traditional method calls only support single arguments"));
                     }

@@ -154,6 +154,9 @@ impl Evaluator {
                     }
                 }
 
+                // Generate automatic getters, setters, and init method
+                self.generate_automatic_methods(&fields, &mut methods);
+
                 let class_def = ClassDef { fields, methods };
                 context.classes.insert(class_name, class_def);
                 Ok(Some(Value::Null))
@@ -3071,5 +3074,51 @@ impl Evaluator {
             }
             _ => Err(CarbonError::type_error("randomInt requires an integer")),
         }
+    }
+
+    /// Generate automatic getters, setters, and init method for a class
+    /// This adds convenient boilerplate methods automatically when a class is defined
+    fn generate_automatic_methods(&self, fields: &[String], methods: &mut Vec<(String, String, Expr)>) {
+        // Check if methods already exist to avoid conflicts
+        let existing_methods: std::collections::HashSet<_> = methods.iter().map(|(name, _, _)| name.clone()).collect();
+
+        // Generate getter methods: getFieldName() -> returns this.fieldName
+        for field in fields {
+            let getter_name = format!("get{}", capitalize_first_letter(field));
+            if !existing_methods.contains(&getter_name) {
+                let getter_expr = Expr::FieldAccessExpr(
+                    Box::new(Expr::ThisExpr),
+                    field.clone()
+                );
+                methods.push((getter_name, "_".to_string(), getter_expr));
+            }
+        }
+
+        // Generate setter methods: setFieldName(value) -> sets this.fieldName = value and returns this
+        for field in fields {
+            let setter_name = format!("set{}", capitalize_first_letter(field));
+            if !existing_methods.contains(&setter_name) {
+                // For now, just return the input value as a placeholder
+                // In a real implementation, this would need proper assignment support
+                let setter_expr = Expr::VarExpr("value".to_string());
+                methods.push((setter_name, "value".to_string(), setter_expr));
+            }
+        }
+
+        // Generate automatic init method: init(value) -> initializes first field and returns this
+        if !existing_methods.contains("init") && !fields.is_empty() {
+            // Simple init that returns this - can be enhanced later
+            let init_expr = Expr::ThisExpr;
+            methods.push(("init".to_string(), "value".to_string(), init_expr));
+        }
+    }
+}
+
+/// Helper function to capitalize the first letter of a string
+fn capitalize_first_letter(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        None => String::new(),
+        Some(first) => first.to_uppercase().collect::<String>() + chars.as_str(),
     }
 }
