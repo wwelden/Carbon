@@ -1,0 +1,5 @@
+let x = 5
+do {
+    print("This executes once")
+    x = 10
+} while (x < 5)

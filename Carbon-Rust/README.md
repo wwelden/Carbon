@@ -50,6 +50,7 @@ bin/carbon
   - Boolean/String patterns: `match flag { true => "on", false => "off" }`
   - Null patterns: `match value { null => "empty", x => "has value" }`
   - Wildcard patterns: `_` matches anything
+  - **Pattern Guards**: `match x { y if y > 10 => "big", _ => "small" }` - conditional pattern matching
 - **Go-Style Error Handling**: Explicit error values and checking (no exceptions)
   - Error creation: `err("something went wrong")`
   - Error checking: `isErr(value)` returns boolean
@@ -70,6 +71,12 @@ bin/carbon
   - Method calls: `object.method(args)`
   - `this` keyword for accessing object fields and methods
   - Constructor-like `init` methods
+  - **Automatic Method Generation**: Carbon automatically generates getters, setters, and init methods
+    - **Auto Getters**: `getFieldName()` - returns field value (e.g., `getName()`, `getAge()`)
+    - **Auto Setters**: `setFieldName(value)` - sets field and returns value (e.g., `setName("John")`)
+    - **Auto Init**: `init(value)` - initialization method for objects
+    - **Manual Override**: User-defined methods take precedence over automatic ones
+    - **Zero-argument Support**: Getters work without parameters: `obj.getName()`
 - **Advanced Data Structures**: Built-in collection types with methods
   - **ArrayList**: `ArrayList[1, 2, 3]` with `push()`, `pop()`, `get()`, `set()` methods
   - **Set**: `Set{"item1", "item2"}` with `add()`, `contains()`, `remove()` methods
@@ -128,10 +135,13 @@ bin/carbon
 
 ### 🚧 In Development
 
-- Enhanced pattern matching with guards
 - Module system and imports
-- Standard library expansion
 - Performance optimizations
+- Do while loops
+- Return multiple values
+- Inheritance
+- Generics (like java)
+- Pointers
 
 ## Directory Structure
 
@@ -209,6 +219,10 @@ cargo run examples/basic_examples/new_syntax_test.cb
 cargo run examples/basic_examples/comprehensive_new_syntax_demo.cb
 cargo run examples/basic_examples/syntax_features_summary.cb
 
+# Automatic method generation
+cargo run examples/auto_methods_simple.cb
+cargo run examples/test_auto_methods.cb
+
 # Standard library tests
 cargo run examples/stdlib_tests/
 
@@ -227,6 +241,8 @@ cargo run examples/demos/
 # Key examples:
 # - basic_examples/new_syntax_test.cb           # New syntax features demo
 # - basic_examples/comprehensive_new_syntax_demo.cb  # Complete new syntax showcase
+# - auto_methods_simple.cb                     # Automatic getter/setter demo
+# - test_auto_methods.cb                       # Comprehensive automatic methods test
 # - stdlib_tests/                              # Standard library comprehensive tests
 # - higher_order_functions/                    # Functional programming examples
 # - data_structures/                           # Advanced data structures
@@ -307,27 +323,48 @@ fn factorial(int n) -> int {
     return result;
 }
 
-// Object-oriented programming
-class Calculator {
-    value;
+// Object-oriented programming with automatic methods
+class Person {
+    name
+    age
+}
 
-    init(int initialValue) {
-        this.value = initialValue;
-        return this;
+let person = new Person();
+
+// Automatic getters (generated automatically)
+print(person.getName());     // null (initial value)
+print(person.getAge());      // null (initial value)
+
+// Automatic setters (generated automatically)
+person.setName("Alice");     // Returns "Alice"
+person.setAge(30);           // Returns 30
+
+// Verify the values were set
+print(person.getName());     // "Alice"
+print(person.getAge());      // 30
+
+// Automatic init method
+person.init("Bob");          // Returns the object
+
+// Custom class with manual methods
+class Calculator {
+    value
+
+    // Manual methods override automatic ones
+    getValue() {
+        return this.value || 0;
     }
 
     add(int x) {
         this.value += x;
         return this;
     }
-
-    getValue() {
-        return this.value;
-    }
 }
 
 let calc = new Calculator();
-calc.init(10).add(5);
+// Automatic setValue() still available, but getValue() uses manual method
+calc.setValue(10);
+calc.add(5);
 print(calc.getValue());  // 15
 
 // Advanced data structures
@@ -411,12 +448,20 @@ match 42 { 42 => "found", _ => "not found" };  // "found"
 match [1,2,3] { [a,b,c] => a+b+c, _ => 0 };    // 6
 match true { true => "yes", false => "no" };   // "yes"
 
-// Complex pattern matching
+// Complex pattern matching with guards
 match [1, x, 3] {
     [1, 2, 3] => "exact match",
+    [1, y, 3] if y > 5 => "large value",  // Guard condition
     [1, y, 3] => y * 100,  // Binds y=2, returns 200
     _ => 0
 };
+
+// Guard patterns for conditional matching
+match 42 {
+    x if x > 50 => "big number",
+    x if x > 10 => "medium number",
+    _ => "small number"
+};  // "medium number"
 
 // Go-style error handling
 let divide = x => y => {
@@ -482,9 +527,9 @@ For detailed syntax reference and language features, see:
 
 The Carbon language is actively being developed. Current priorities:
 
-1. **Enhanced Pattern Matching**: Pattern guards, nested patterns, and complex expressions
+1. **~~Enhanced Pattern Matching~~**: ✅ **COMPLETED** - Pattern guards, nested patterns, and complex expressions
 2. **Module System**: Import/export functionality for code organization
-3. **Standard Library Expansion**: More built-in functions and utilities
+3. **~~Standard Library Expansion~~**: ✅ **COMPLETED** - Comprehensive stdlib with data structures, higher-order functions, math, strings, arrays, type checking, and utilities
 4. **Performance Optimizations**: Bytecode compilation and runtime improvements
 5. **~~Multi-Parameter Arrow Functions~~**: ✅ **COMPLETED** - Support for `(x, y) => x + y` syntax
 6. **Generic Types**: Type parameters for functions and data structures
@@ -507,6 +552,21 @@ cargo build --release
 
 ## Recent Accomplishments
 
+- ✅ **NEW: Automatic Method Generation**: Carbon now automatically generates getters, setters, and init methods for all class fields
+  - Auto-generated `getFieldName()` getters that return field values
+  - Auto-generated `setFieldName(value)` setters that set and return values
+  - Auto-generated `init(value)` method for object initialization
+  - Manual methods take precedence over automatic ones
+  - Zero-argument method calls now supported (`obj.getName()`)
+  - Comprehensive test suite with 8 tests validating all automatic method features
+- ✅ **COMPLETED: Comprehensive Standard Library**: Carbon now has a complete standard library implementation
+  - Advanced data structures (ArrayList, Set, Map, Stack, Queue, LinkedList)
+  - Complete higher-order functional programming suite (map, filter, fold, compose, zip, etc.)
+  - Mathematical operations (trigonometric, logarithmic, power functions)
+  - String processing (case conversion, trimming, splitting, joining, substring operations)
+  - Array utilities (concatenation, flattening, slicing, membership testing)
+  - Runtime type checking and conversion functions
+  - Random number generation and comprehensive type conversions
 - ✅ **NEW: Enhanced Variable Declarations**: Added support for `var` (mutable type inference), `let` (immutable type inference), and `let type` (typed constants)
 - ✅ **NEW: Multi-Parameter Lambda Functions**: Full support for `(x, y) => x + y` syntax with seamless higher-order function integration
 - ✅ **NEW: Comprehensive Documentation**: Organized examples directory and detailed syntax guide in `docs/SYNTAX_GUIDE.md`
@@ -529,7 +589,7 @@ cargo build --release
 - ✅ **Increment/Decrement Operators**: `++` and `--` for convenient counting operations
 - ✅ **Go-Style Error Handling**: Explicit error values with `err()` and `isErr()` functions
 - ✅ **Tuples**: Multi-value returns with `(value1, value2, ...)` syntax
-- ✅ **Pattern Matching**: Full implementation with literal, variable, array, and wildcard patterns
+- ✅ **Pattern Matching**: Full implementation with literal, variable, array, wildcard, and guard patterns
 - ✅ **Arrow Functions**: JavaScript-style `x => x + 1` syntax
 - ✅ **For-In Loops**: Go-style `for item in array { ... }`
 - ✅ **Logical Operators**: Fixed `||` and `&&` tokenization and evaluation

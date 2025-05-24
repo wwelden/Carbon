@@ -1,0 +1,17 @@
+print("Testing do-while loops:")
+
+let counter = 0
+do {
+    print("Counter: " + toString(counter))
+    counter++
+} while (counter < 3)
+
+print("Final counter: " + toString(counter))
+
+let x = 5
+do {
+    print("This executes once even though condition is false")
+    x = 10
+} while (x < 5)
+
+print("x is now: " + toString(x))

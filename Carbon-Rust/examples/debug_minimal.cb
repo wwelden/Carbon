@@ -1,0 +1,16 @@
+print("Do-While Loop Tests")
+
+print("Test 1: Basic do-while loop")
+let counter = 0
+do {
+    print("Loop iteration")
+    counter++
+} while (counter < 3)
+print("Loop completed")
+
+print("Test 2: Do-while that executes once")
+let x = 5
+do {
+    print("This executes once")
+    x = 10
+} while (x < 5)

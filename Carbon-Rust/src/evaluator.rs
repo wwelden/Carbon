@@ -196,6 +196,23 @@ impl Evaluator {
                 }
                 Ok(Some(last_value))
             }
+            Statement::DoWhileStmt(statements, condition) => {
+                let mut last_value = Value::Null;
+                loop {
+                    // Execute the body first (at least once)
+                    for stmt in &statements {
+                        if let Some(val) = self.eval_statement(context, stmt.clone())? {
+                            last_value = val;
+                        }
+                    }
+                    // Then check the condition
+                    let cond_val = self.eval_expr(context, condition.clone())?;
+                    if !cond_val.is_truthy() {
+                        break;
+                    }
+                }
+                Ok(Some(last_value))
+            }
             Statement::CompoundAssignStmt(var, op, expr) => {
                 let current = context.env.get(&var)
                     .ok_or_else(|| CarbonError::undefined_variable(&var))?

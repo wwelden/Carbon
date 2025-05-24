@@ -17,6 +17,7 @@ pub enum Statement {
     ClassStmt(ClassName, Vec<ClassMember>),
     ForInStmt(Var, Expr, Vec<Statement>),
     WhileStmt(Expr, Vec<Statement>),
+    DoWhileStmt(Vec<Statement>, Expr),
     CompoundAssignStmt(Var, CompoundOp, Expr),
     IncrementStmt(Var),
     DecrementStmt(Var),

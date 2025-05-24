@@ -1,0 +1,9 @@
+print("Testing do-while loops")
+
+let counter = 0
+do {
+    print("In loop")
+    counter++
+} while (counter < 2)
+
+print("Done")

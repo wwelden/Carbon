@@ -41,6 +41,7 @@ impl Parser {
             Token::Fn => self.fn_declaration(),
             Token::Class => self.class_statement(),
             Token::For => self.for_statement(),
+            Token::Do => self.do_while_statement(),
             Token::Return => self.return_statement(),
             Token::Identifier(name) => {
                 let name = name.clone();
@@ -64,6 +65,12 @@ impl Parser {
                         self.advance();
                         self.consume_semicolon()?;
                         Ok(Statement::DecrementStmt(name))
+                    }
+                    Token::Assign => {
+                        self.advance();
+                        let expr = self.expression()?;
+                        self.consume_semicolon()?;
+                        Ok(Statement::ExprStmt(Expr::BOpExpr(BOp::EqOp, Box::new(Expr::VarExpr(name)), Box::new(expr))))
                     }
                     _ => {
                         // It's an expression statement, backtrack
@@ -206,6 +213,19 @@ impl Parser {
         } else {
             false
         }
+    }
+
+    fn do_while_statement(&mut self) -> Result<Statement> {
+        self.consume(&Token::Do)?;
+        self.consume(&Token::LeftBrace)?;
+        let statements = self.statement_list()?;
+        self.consume(&Token::RightBrace)?;
+        self.consume(&Token::While)?;
+        self.consume(&Token::LeftParen)?;
+        let condition = self.expression()?;
+        self.consume(&Token::RightParen)?;
+        self.consume_semicolon()?;
+        Ok(Statement::DoWhileStmt(statements, condition))
     }
 
     fn return_statement(&mut self) -> Result<Statement> {
