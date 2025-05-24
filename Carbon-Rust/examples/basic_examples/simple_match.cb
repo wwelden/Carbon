@@ -1,0 +1,4 @@
+let result = match 5 {
+    x => x
+};
+print(toString(result));

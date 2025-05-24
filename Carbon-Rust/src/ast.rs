@@ -78,6 +78,7 @@ pub enum Expr {
     MatchExpr(Box<Expr>, Vec<MatchCase>),
     ErrorExpr(String),
     TupleExpr(Vec<Expr>),
+    TupleAccessExpr(Box<Expr>, usize),               // Tuple element access by index: tuple.0, tuple.1, etc.
     IsErrorExpr(Box<Expr>),
     ThisExpr,
     ArrayListExpr(Vec<Expr>),                    // ArrayList creation

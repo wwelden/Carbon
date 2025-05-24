@@ -565,17 +565,26 @@ impl Parser {
             let expr = self.expression()?;
             cases.push((pattern, expr));
 
-            if self.match_token(&Token::Comma) {
-                continue;
-            } else {
-                break;
-            }
+            // Optional comma - continue parsing regardless
+            self.match_token(&Token::Comma);
         }
 
         Ok(cases)
     }
 
     fn pattern(&mut self) -> Result<Pattern> {
+        let base_pattern = self.base_pattern()?;
+
+        // Check for guard pattern: pattern if condition
+        if self.match_token(&Token::If) {
+            let guard_condition = self.expression()?;
+            Ok(Pattern::GuardPat(Box::new(base_pattern), Box::new(guard_condition)))
+        } else {
+            Ok(base_pattern)
+        }
+    }
+
+    fn base_pattern(&mut self) -> Result<Pattern> {
         let token = self.advance().clone();
 
         match token {
@@ -602,7 +611,7 @@ impl Parser {
 
                 if !self.check(&Token::RightBracket) {
                     loop {
-                        patterns.push(self.pattern()?);
+                        patterns.push(self.base_pattern()?);
                         if !self.match_token(&Token::Comma) {
                             break;
                         }
@@ -613,25 +622,24 @@ impl Parser {
                 Ok(Pattern::ArrayPat(patterns))
             }
             Token::LeftParen => {
-                // Check if this is a tuple pattern
-                if self.is_tuple_pattern() {
-                    let mut patterns = Vec::new();
-                    patterns.push(self.pattern()?);
+                // Try to parse as tuple pattern first
+                let first_pattern = self.base_pattern()?;
 
-                    self.consume(&Token::Comma)?;
+                if self.match_token(&Token::Comma) {
+                    // This is a tuple pattern
+                    let mut patterns = vec![first_pattern];
                     loop {
-                        patterns.push(self.pattern()?);
+                        patterns.push(self.base_pattern()?);
                         if !self.match_token(&Token::Comma) {
                             break;
                         }
                     }
-
                     self.consume(&Token::RightParen)?;
                     Ok(Pattern::TuplePat(patterns))
                 } else {
-                    let pattern = self.pattern()?;
+                    // This is a grouped pattern
                     self.consume(&Token::RightParen)?;
-                    Ok(pattern)
+                    Ok(first_pattern)
                 }
             }
             _ => Err(self.error(&format!("Invalid pattern: {:?}", token))),
@@ -646,7 +654,13 @@ impl Parser {
         while lookahead < self.tokens.len() && paren_count > 0 {
             match &self.tokens[lookahead] {
                 Token::LeftParen => paren_count += 1,
-                Token::RightParen => paren_count -= 1,
+                Token::RightParen => {
+                    paren_count -= 1;
+                    if paren_count == 0 {
+                        // Reached the end without finding a comma at the top level
+                        return false;
+                    }
+                }
                 Token::Comma if paren_count == 1 => return true,
                 _ => {}
             }

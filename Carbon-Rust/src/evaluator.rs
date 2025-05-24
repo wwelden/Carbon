@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 use std::collections::VecDeque;
-use crate::ast::{Statement, Expr, BOp, CompoundOp, Var, ClassName, ClassMember, MatchCase, Pattern, Literal};
+use crate::ast::{Statement, Expr, BOp, CompoundOp, ClassName, ClassMember, MatchCase, Pattern};
 use crate::value::{Value, Environment, ClassDef, LinkedListNode};
 use crate::error::{CarbonError, Result};
 
@@ -22,107 +22,71 @@ impl Context {
         context
     }
 
+    /// Helper method to register multiple builtin functions at once
+    fn register_builtin_functions(&mut self, functions: &[&str]) {
+        for &func_name in functions {
+            self.env.insert(func_name.to_string(), Value::BuiltinFunction(func_name.to_string()));
+        }
+    }
+
     fn init_global_functions(&mut self) {
-        // Initialize built-in higher order functions
-        self.env.insert("map".to_string(), Value::BuiltinFunction("map".to_string()));
-        self.env.insert("filter".to_string(), Value::BuiltinFunction("filter".to_string()));
-        self.env.insert("fold".to_string(), Value::BuiltinFunction("fold".to_string()));
-        self.env.insert("reduce".to_string(), Value::BuiltinFunction("reduce".to_string()));
-        self.env.insert("forEach".to_string(), Value::BuiltinFunction("forEach".to_string()));
-        self.env.insert("find".to_string(), Value::BuiltinFunction("find".to_string()));
-        self.env.insert("any".to_string(), Value::BuiltinFunction("any".to_string()));
-        self.env.insert("some".to_string(), Value::BuiltinFunction("some".to_string()));
-        self.env.insert("all".to_string(), Value::BuiltinFunction("all".to_string()));
-        self.env.insert("every".to_string(), Value::BuiltinFunction("every".to_string()));
-        self.env.insert("compose".to_string(), Value::BuiltinFunction("compose".to_string()));
-        self.env.insert("zip".to_string(), Value::BuiltinFunction("zip".to_string()));
+        // Core higher-order functions
+        self.register_builtin_functions(&[
+            "map", "filter", "fold", "reduce", "forEach", "find", "any", "some", "all", "every",
+            "compose", "zip"
+        ]);
 
-        // Additional higher order functions
-        self.env.insert("flatMap".to_string(), Value::BuiltinFunction("flatMap".to_string()));
-        self.env.insert("partition".to_string(), Value::BuiltinFunction("partition".to_string()));
-        self.env.insert("groupBy".to_string(), Value::BuiltinFunction("groupBy".to_string()));
-        self.env.insert("take".to_string(), Value::BuiltinFunction("take".to_string()));
-        self.env.insert("drop".to_string(), Value::BuiltinFunction("drop".to_string()));
-        self.env.insert("reverse".to_string(), Value::BuiltinFunction("reverse".to_string()));
-        self.env.insert("sort".to_string(), Value::BuiltinFunction("sort".to_string()));
-        self.env.insert("unique".to_string(), Value::BuiltinFunction("unique".to_string()));
-        self.env.insert("zipWith".to_string(), Value::BuiltinFunction("zipWith".to_string()));
-        self.env.insert("scan".to_string(), Value::BuiltinFunction("scan".to_string()));
-
-        // New higher order functions
-        self.env.insert("concatMap".to_string(), Value::BuiltinFunction("concatMap".to_string()));
-        self.env.insert("chunk".to_string(), Value::BuiltinFunction("chunk".to_string()));
-        self.env.insert("window".to_string(), Value::BuiltinFunction("window".to_string()));
-        self.env.insert("intercalate".to_string(), Value::BuiltinFunction("intercalate".to_string()));
-        self.env.insert("transpose".to_string(), Value::BuiltinFunction("transpose".to_string()));
-        self.env.insert("max".to_string(), Value::BuiltinFunction("max".to_string()));
-        self.env.insert("min".to_string(), Value::BuiltinFunction("min".to_string()));
-        self.env.insert("count".to_string(), Value::BuiltinFunction("count".to_string()));
-        self.env.insert("sum".to_string(), Value::BuiltinFunction("sum".to_string()));
-        self.env.insert("product".to_string(), Value::BuiltinFunction("product".to_string()));
-        self.env.insert("head".to_string(), Value::BuiltinFunction("head".to_string()));
-        self.env.insert("tail".to_string(), Value::BuiltinFunction("tail".to_string()));
-        self.env.insert("init".to_string(), Value::BuiltinFunction("init".to_string()));
-        self.env.insert("last".to_string(), Value::BuiltinFunction("last".to_string()));
-        self.env.insert("repeat".to_string(), Value::BuiltinFunction("repeat".to_string()));
-        self.env.insert("range".to_string(), Value::BuiltinFunction("range".to_string()));
-        self.env.insert("intersperse".to_string(), Value::BuiltinFunction("intersperse".to_string()));
-        self.env.insert("sortBy".to_string(), Value::BuiltinFunction("sortBy".to_string()));
-        self.env.insert("nub".to_string(), Value::BuiltinFunction("nub".to_string()));
+        // Advanced higher-order functions
+        self.register_builtin_functions(&[
+            "flatMap", "partition", "groupBy", "take", "drop", "reverse", "sort", "unique",
+            "zipWith", "scan", "concatMap", "chunk", "window", "intercalate", "transpose",
+            "max", "min", "count", "sum", "product", "head", "tail", "init", "last",
+            "repeat", "range", "intersperse", "sortBy", "nub"
+        ]);
 
         // Math functions
-        self.env.insert("abs".to_string(), Value::BuiltinFunction("abs".to_string()));
-        self.env.insert("floor".to_string(), Value::BuiltinFunction("floor".to_string()));
-        self.env.insert("ceil".to_string(), Value::BuiltinFunction("ceil".to_string()));
-        self.env.insert("round".to_string(), Value::BuiltinFunction("round".to_string()));
-        self.env.insert("sqrt".to_string(), Value::BuiltinFunction("sqrt".to_string()));
-        self.env.insert("pow".to_string(), Value::BuiltinFunction("pow".to_string()));
-        self.env.insert("sin".to_string(), Value::BuiltinFunction("sin".to_string()));
-        self.env.insert("cos".to_string(), Value::BuiltinFunction("cos".to_string()));
-        self.env.insert("tan".to_string(), Value::BuiltinFunction("tan".to_string()));
-        self.env.insert("log".to_string(), Value::BuiltinFunction("log".to_string()));
-        self.env.insert("log10".to_string(), Value::BuiltinFunction("log10".to_string()));
-        self.env.insert("exp".to_string(), Value::BuiltinFunction("exp".to_string()));
+        self.register_builtin_functions(&[
+            "abs", "floor", "ceil", "round", "sqrt", "pow", "sin", "cos", "tan",
+            "log", "log10", "exp"
+        ]);
 
         // String functions
-        self.env.insert("length".to_string(), Value::BuiltinFunction("length".to_string()));
-        self.env.insert("toUpperCase".to_string(), Value::BuiltinFunction("toUpperCase".to_string()));
-        self.env.insert("toLowerCase".to_string(), Value::BuiltinFunction("toLowerCase".to_string()));
-        self.env.insert("trim".to_string(), Value::BuiltinFunction("trim".to_string()));
-        self.env.insert("split".to_string(), Value::BuiltinFunction("split".to_string()));
-        self.env.insert("join".to_string(), Value::BuiltinFunction("join".to_string()));
-        self.env.insert("substring".to_string(), Value::BuiltinFunction("substring".to_string()));
-        self.env.insert("indexOf".to_string(), Value::BuiltinFunction("indexOf".to_string()));
-        self.env.insert("replace".to_string(), Value::BuiltinFunction("replace".to_string()));
-        self.env.insert("startsWith".to_string(), Value::BuiltinFunction("startsWith".to_string()));
-        self.env.insert("endsWith".to_string(), Value::BuiltinFunction("endsWith".to_string()));
+        self.register_builtin_functions(&[
+            "length", "toUpperCase", "toLowerCase", "trim", "split", "join", "substring",
+            "indexOf", "replace", "startsWith", "endsWith"
+        ]);
 
         // Array utility functions
-        self.env.insert("empty".to_string(), Value::BuiltinFunction("empty".to_string()));
-        self.env.insert("length".to_string(), Value::BuiltinFunction("length".to_string()));
-        self.env.insert("concat".to_string(), Value::BuiltinFunction("concat".to_string()));
-        self.env.insert("flatten".to_string(), Value::BuiltinFunction("flatten".to_string()));
-        self.env.insert("indexOf".to_string(), Value::BuiltinFunction("indexOf".to_string()));
-        self.env.insert("includes".to_string(), Value::BuiltinFunction("includes".to_string()));
-        self.env.insert("slice".to_string(), Value::BuiltinFunction("slice".to_string()));
+        self.register_builtin_functions(&[
+            "empty", "concat", "flatten", "includes", "slice"
+        ]);
 
         // Type checking functions
-        self.env.insert("isNumber".to_string(), Value::BuiltinFunction("isNumber".to_string()));
-        self.env.insert("isString".to_string(), Value::BuiltinFunction("isString".to_string()));
-        self.env.insert("isBool".to_string(), Value::BuiltinFunction("isBool".to_string()));
-        self.env.insert("isArray".to_string(), Value::BuiltinFunction("isArray".to_string()));
-        self.env.insert("isFunction".to_string(), Value::BuiltinFunction("isFunction".to_string()));
-        self.env.insert("isNull".to_string(), Value::BuiltinFunction("isNull".to_string()));
-        self.env.insert("isObject".to_string(), Value::BuiltinFunction("isObject".to_string()));
+        self.register_builtin_functions(&[
+            "isNumber", "isString", "isBool", "isArray", "isFunction", "isNull", "isObject"
+        ]);
 
         // Random functions
-        self.env.insert("random".to_string(), Value::BuiltinFunction("random".to_string()));
-        self.env.insert("randomInt".to_string(), Value::BuiltinFunction("randomInt".to_string()));
+        self.register_builtin_functions(&[
+            "random", "randomInt"
+        ]);
 
         // Conversion functions
-        self.env.insert("toInt".to_string(), Value::BuiltinFunction("toInt".to_string()));
-        self.env.insert("toFloat".to_string(), Value::BuiltinFunction("toFloat".to_string()));
-        self.env.insert("toBool".to_string(), Value::BuiltinFunction("toBool".to_string()));
+        self.register_builtin_functions(&[
+
+            "toInt", "toFloat", "toBool"
+        ]);
+
+        // Initialize mathematical constants
+        self.init_mathematical_constants();
+    }
+
+    /// Helper method to register mathematical constants
+    fn init_mathematical_constants(&mut self) {
+        self.env.insert("PI".to_string(), Value::Real(std::f64::consts::PI));
+        self.env.insert("E".to_string(), Value::Real(std::f64::consts::E));
+        self.env.insert("PHI".to_string(), Value::Real(1.618033988749894)); // Golden ratio
+        self.env.insert("AVOGADRO".to_string(), Value::Real(6.02214076e23));
     }
 }
 
@@ -261,6 +225,108 @@ impl Evaluator {
         }
     }
 
+    /// Helper method to handle builtin implementation functions
+    /// Uses a macro-based approach to eliminate repetition
+    fn try_builtin_implementation(&mut self, name: &str, context: &mut Context) -> Result<Option<Value>> {
+        macro_rules! builtin_dispatch {
+            ($($builtin_name:literal => $method_name:ident),* $(,)?) => {
+                match name {
+                    $(
+                        $builtin_name => Some(self.$method_name(context)?),
+                    )*
+                    _ => None,
+                }
+            };
+        }
+
+        let result = builtin_dispatch! {
+            // Core higher-order functions
+            "__builtin_map_implementation" => builtin_map_implementation,
+            "__builtin_filter_implementation" => builtin_filter_implementation,
+            "__builtin_fold_implementation" => builtin_fold_implementation,
+            "__builtin_foreach_implementation" => builtin_foreach_implementation,
+            "__builtin_find_implementation" => builtin_find_implementation,
+            "__builtin_any_implementation" => builtin_any_implementation,
+            "__builtin_all_implementation" => builtin_all_implementation,
+            "__builtin_compose_implementation" => builtin_compose_implementation,
+            "__builtin_zip_implementation" => builtin_zip_implementation,
+
+
+            // Advanced higher-order functions
+            "__builtin_flatmap_implementation" => builtin_flatmap_implementation,
+            "__builtin_partition_implementation" => builtin_partition_implementation,
+            "__builtin_groupby_implementation" => builtin_groupby_implementation,
+            "__builtin_take_implementation" => builtin_take_implementation,
+            "__builtin_drop_implementation" => builtin_drop_implementation,
+            "__builtin_reverse_implementation" => builtin_reverse_implementation,
+            "__builtin_sort_implementation" => builtin_sort_implementation,
+            "__builtin_unique_implementation" => builtin_unique_implementation,
+            "__builtin_zipwith_implementation" => builtin_zipwith_implementation,
+            "__builtin_scan_implementation" => builtin_scan_implementation,
+            "__builtin_concatmap_implementation" => builtin_concatmap_implementation,
+            "__builtin_chunk_implementation" => builtin_chunk_implementation,
+            "__builtin_window_implementation" => builtin_window_implementation,
+            "__builtin_intercalate_implementation" => builtin_intercalate_implementation,
+            "__builtin_transpose_implementation" => builtin_transpose_implementation,
+            "__builtin_max_implementation" => builtin_max_implementation,
+            "__builtin_min_implementation" => builtin_min_implementation,
+            "__builtin_count_implementation" => builtin_count_implementation,
+            "__builtin_sum_implementation" => builtin_sum_implementation,
+            "__builtin_product_implementation" => builtin_product_implementation,
+            "__builtin_head_implementation" => builtin_head_implementation,
+            "__builtin_tail_implementation" => builtin_tail_implementation,
+            "__builtin_init_implementation" => builtin_init_implementation,
+            "__builtin_last_implementation" => builtin_last_implementation,
+            "__builtin_repeat_implementation" => builtin_repeat_implementation,
+            "__builtin_range_implementation" => builtin_range_implementation,
+            "__builtin_intersperse_implementation" => builtin_intersperse_implementation,
+            "__builtin_sortby_implementation" => builtin_sortby_implementation,
+            "__builtin_nub_implementation" => builtin_nub_implementation,
+
+            // Math and utility functions
+            "__builtin_pow_implementation" => builtin_pow_implementation,
+            "__builtin_split_implementation" => builtin_split_implementation,
+            "__builtin_join_implementation" => builtin_join_implementation,
+            "__builtin_substring_implementation" => builtin_substring_implementation,
+            "__builtin_indexof_implementation" => builtin_indexof_implementation,
+            "__builtin_replace_implementation" => builtin_replace_implementation,
+            "__builtin_startswith_implementation" => builtin_startswith_implementation,
+            "__builtin_endswith_implementation" => builtin_endswith_implementation,
+            "__builtin_concat_implementation" => builtin_concat_implementation,
+            "__builtin_includes_implementation" => builtin_includes_implementation,
+            "__builtin_slice_implementation" => builtin_slice_implementation,
+            "__builtin_randomint_implementation" => builtin_randomint_implementation,
+        };
+
+        Ok(result)
+    }
+
+    /// Helper method to evaluate a collection of expressions
+    fn eval_expr_collection(&mut self, context: &mut Context, exprs: Vec<Expr>) -> Result<Vec<Value>> {
+        exprs.into_iter()
+            .map(|expr| self.eval_expr(context, expr))
+            .collect()
+    }
+
+    /// Helper method for unary operations that evaluate an expression then apply a function
+    fn eval_unary_op<F>(&mut self, context: &mut Context, expr: Expr, op: F) -> Result<Value>
+    where
+        F: FnOnce(Value) -> Result<Value>,
+    {
+        let value = self.eval_expr(context, expr)?;
+        op(value)
+    }
+
+    /// Helper method for conditional expressions (if/ternary)
+    fn eval_conditional(&mut self, context: &mut Context, condition: Expr, then_expr: Expr, else_expr: Expr) -> Result<Value> {
+        let cond_val = self.eval_expr(context, condition)?;
+        if cond_val.is_truthy() {
+            self.eval_expr(context, then_expr)
+        } else {
+            self.eval_expr(context, else_expr)
+        }
+    }
+
     pub fn eval_expr(&mut self, context: &mut Context, expr: Expr) -> Result<Value> {
         match expr {
             Expr::IntExpr(i) => Ok(Value::Int(i)),
@@ -278,163 +344,12 @@ impl Evaluator {
             // Variables
             Expr::VarExpr(name) => {
                 // Handle built-in higher order function implementations
-                match name.as_str() {
-                    "__builtin_map_implementation" => {
-                        self.builtin_map_implementation(context)
-                    }
-                    "__builtin_filter_implementation" => {
-                        self.builtin_filter_implementation(context)
-                    }
-                    "__builtin_fold_implementation" => {
-                        self.builtin_fold_implementation(context)
-                    }
-                    "__builtin_foreach_implementation" => {
-                        self.builtin_foreach_implementation(context)
-                    }
-                    "__builtin_find_implementation" => {
-                        self.builtin_find_implementation(context)
-                    }
-                    "__builtin_any_implementation" => {
-                        self.builtin_any_implementation(context)
-                    }
-                    "__builtin_all_implementation" => {
-                        self.builtin_all_implementation(context)
-                    }
-                    "__builtin_compose_implementation" => {
-                        self.builtin_compose_implementation(context)
-                    }
-                    "__builtin_zip_implementation" => {
-                        self.builtin_zip_implementation(context)
-                    }
-                    "__builtin_flatmap_implementation" => {
-                        self.builtin_flatmap_implementation(context)
-                    }
-                    "__builtin_partition_implementation" => {
-                        self.builtin_partition_implementation(context)
-                    }
-                    "__builtin_groupby_implementation" => {
-                        self.builtin_groupby_implementation(context)
-                    }
-                    "__builtin_take_implementation" => {
-                        self.builtin_take_implementation(context)
-                    }
-                    "__builtin_drop_implementation" => {
-                        self.builtin_drop_implementation(context)
-                    }
-                    "__builtin_reverse_implementation" => {
-                        self.builtin_reverse_implementation(context)
-                    }
-                    "__builtin_sort_implementation" => {
-                        self.builtin_sort_implementation(context)
-                    }
-                    "__builtin_unique_implementation" => {
-                        self.builtin_unique_implementation(context)
-                    }
-                    "__builtin_zipwith_implementation" => {
-                        self.builtin_zipwith_implementation(context)
-                    }
-                    "__builtin_scan_implementation" => {
-                        self.builtin_scan_implementation(context)
-                    }
-                    // New builtin implementations
-                    "__builtin_concatmap_implementation" => {
-                        self.builtin_concatmap_implementation(context)
-                    }
-                    "__builtin_chunk_implementation" => {
-                        self.builtin_chunk_implementation(context)
-                    }
-                    "__builtin_window_implementation" => {
-                        self.builtin_window_implementation(context)
-                    }
-                    "__builtin_intercalate_implementation" => {
-                        self.builtin_intercalate_implementation(context)
-                    }
-                    "__builtin_transpose_implementation" => {
-                        self.builtin_transpose_implementation(context)
-                    }
-                    "__builtin_max_implementation" => {
-                        self.builtin_max_implementation(context)
-                    }
-                    "__builtin_min_implementation" => {
-                        self.builtin_min_implementation(context)
-                    }
-                    "__builtin_count_implementation" => {
-                        self.builtin_count_implementation(context)
-                    }
-                    "__builtin_sum_implementation" => {
-                        self.builtin_sum_implementation(context)
-                    }
-                    "__builtin_product_implementation" => {
-                        self.builtin_product_implementation(context)
-                    }
-                    "__builtin_head_implementation" => {
-                        self.builtin_head_implementation(context)
-                    }
-                    "__builtin_tail_implementation" => {
-                        self.builtin_tail_implementation(context)
-                    }
-                    "__builtin_init_implementation" => {
-                        self.builtin_init_implementation(context)
-                    }
-                    "__builtin_last_implementation" => {
-                        self.builtin_last_implementation(context)
-                    }
-                    "__builtin_repeat_implementation" => {
-                        self.builtin_repeat_implementation(context)
-                    }
-                    "__builtin_range_implementation" => {
-                        self.builtin_range_implementation(context)
-                    }
-                    "__builtin_intersperse_implementation" => {
-                        self.builtin_intersperse_implementation(context)
-                    }
-                    "__builtin_sortby_implementation" => {
-                        self.builtin_sortby_implementation(context)
-                    }
-                    "__builtin_nub_implementation" => {
-                        self.builtin_nub_implementation(context)
-                    }
-                    "__builtin_pow_implementation" => {
-                        self.builtin_pow_implementation(context)
-                    }
-                    "__builtin_split_implementation" => {
-                        self.builtin_split_implementation(context)
-                    }
-                    "__builtin_join_implementation" => {
-                        self.builtin_join_implementation(context)
-                    }
-                    "__builtin_substring_implementation" => {
-                        self.builtin_substring_implementation(context)
-                    }
-                    "__builtin_indexof_implementation" => {
-                        self.builtin_indexof_implementation(context)
-                    }
-                    "__builtin_replace_implementation" => {
-                        self.builtin_replace_implementation(context)
-                    }
-                    "__builtin_startswith_implementation" => {
-                        self.builtin_startswith_implementation(context)
-                    }
-                    "__builtin_endswith_implementation" => {
-                        self.builtin_endswith_implementation(context)
-                    }
-                    "__builtin_concat_implementation" => {
-                        self.builtin_concat_implementation(context)
-                    }
-                    "__builtin_includes_implementation" => {
-                        self.builtin_includes_implementation(context)
-                    }
-                    "__builtin_slice_implementation" => {
-                        self.builtin_slice_implementation(context)
-                    }
-                    "__builtin_randomint_implementation" => {
-                        self.builtin_randomint_implementation(context)
-                    }
-                    _ => {
-                        context.env.get(&name)
-                            .cloned()
-                            .ok_or_else(|| CarbonError::undefined_variable(&name))
-                    }
+                if let Some(result) = self.try_builtin_implementation(&name, context)? {
+                    Ok(result)
+                } else {
+                    context.env.get(&name)
+                        .cloned()
+                        .ok_or_else(|| CarbonError::undefined_variable(&name))
                 }
             }
 
@@ -443,10 +358,7 @@ impl Evaluator {
                 let value = self.eval_expr(context, *expr)?;
                 self.eval_negate(value)
             }
-            Expr::NotExpr(expr) => {
-                let value = self.eval_expr(context, *expr)?;
-                Ok(Value::Bool(!value.is_truthy()))
-            }
+            Expr::NotExpr(expr) => self.eval_unary_op(context, *expr, |v| Ok(Value::Bool(!v.is_truthy()))),
             Expr::SqrtExpr(expr) => {
                 let value = self.eval_expr(context, *expr)?;
                 self.eval_sqrt(value)
@@ -461,28 +373,15 @@ impl Evaluator {
 
             // Control flow
             Expr::IfExpr(condition, then_expr, else_expr) => {
-                let cond_val = self.eval_expr(context, *condition)?;
-                if cond_val.is_truthy() {
-                    self.eval_expr(context, *then_expr)
-                } else {
-                    self.eval_expr(context, *else_expr)
-                }
+                self.eval_conditional(context, *condition, *then_expr, *else_expr)
             }
             Expr::TernaryExpr(condition, then_expr, else_expr) => {
-                let cond_val = self.eval_expr(context, *condition)?;
-                if cond_val.is_truthy() {
-                    self.eval_expr(context, *then_expr)
-                } else {
-                    self.eval_expr(context, *else_expr)
-                }
+                self.eval_conditional(context, *condition, *then_expr, *else_expr)
             }
 
             // Arrays
             Expr::ArrayExpr(exprs) => {
-                let mut values = Vec::new();
-                for expr in exprs {
-                    values.push(self.eval_expr(context, expr)?);
-                }
+                let values = self.eval_expr_collection(context, exprs)?;
                 Ok(Value::Array(values))
             }
             Expr::ArrayLenExpr(expr) => {
@@ -495,13 +394,8 @@ impl Evaluator {
                 }
             }
 
-            // Functions
-            Expr::FuncExpr(param, body) => Ok(Value::Function {
-                env: context.env.clone(),
-                param,
-                body,
-            }),
-            Expr::FunctionExpr(param, body) => Ok(Value::Function {
+            // Functions (both FuncExpr and FunctionExpr create the same Value::Function)
+            Expr::FuncExpr(param, body) | Expr::FunctionExpr(param, body) => Ok(Value::Function {
                 env: context.env.clone(),
                 param,
                 body,
@@ -513,18 +407,9 @@ impl Evaluator {
             }
 
             // Built-in functions
-            Expr::PrintExpr(expr) => {
-                let value = self.eval_expr(context, *expr)?;
-                Ok(Value::Print(value.to_string()))
-            }
-            Expr::ToStringExpr(expr) => {
-                let value = self.eval_expr(context, *expr)?;
-                Ok(Value::String(value.to_string()))
-            }
-            Expr::TypeOfExpr(expr) => {
-                let value = self.eval_expr(context, *expr)?;
-                Ok(Value::String(value.type_name().to_string()))
-            }
+            Expr::PrintExpr(expr) => self.eval_unary_op(context, *expr, |v| Ok(Value::Print(v.to_string()))),
+            Expr::ToStringExpr(expr) => self.eval_unary_op(context, *expr, |v| Ok(Value::String(v.to_string()))),
+            Expr::TypeOfExpr(expr) => self.eval_unary_op(context, *expr, |v| Ok(Value::String(v.type_name().to_string()))),
 
             // Pattern matching
             Expr::MatchExpr(expr, cases) => {
@@ -534,26 +419,33 @@ impl Evaluator {
 
             // Error handling
             Expr::ErrorExpr(msg) => Ok(Value::Error(msg)),
-            Expr::IsErrorExpr(expr) => {
-                let value = self.eval_expr(context, *expr)?;
-                Ok(Value::Bool(value.is_error()))
-            }
+            Expr::IsErrorExpr(expr) => self.eval_unary_op(context, *expr, |v| Ok(Value::Bool(v.is_error()))),
 
             // Tuples
             Expr::TupleExpr(exprs) => {
-                let mut values = Vec::new();
-                for expr in exprs {
-                    values.push(self.eval_expr(context, expr)?);
-                }
+                let values = self.eval_expr_collection(context, exprs)?;
                 Ok(Value::Tuple(values))
+            }
+            Expr::TupleAccessExpr(tuple_expr, index) => {
+                let tuple_value = self.eval_expr(context, *tuple_expr)?;
+                match tuple_value {
+                    Value::Tuple(values) => {
+                        if index < values.len() {
+                            Ok(values[index].clone())
+                        } else {
+                            Err(CarbonError::runtime_error(&format!(
+                                "Tuple index {} out of bounds for tuple of length {}",
+                                index, values.len()
+                            )))
+                        }
+                    }
+                    _ => Err(CarbonError::type_error("Tuple access requires a tuple")),
+                }
             }
 
             // New data structures
             Expr::ArrayListExpr(exprs) => {
-                let mut values = Vec::new();
-                for expr in exprs {
-                    values.push(self.eval_expr(context, expr)?);
-                }
+                let values = self.eval_expr_collection(context, exprs)?;
                 Ok(Value::ArrayList(values))
             }
             Expr::SetExpr(exprs) => {
@@ -574,10 +466,7 @@ impl Evaluator {
                 Ok(Value::Map(map))
             }
             Expr::StackExpr(exprs) => {
-                let mut values = Vec::new();
-                for expr in exprs {
-                    values.push(self.eval_expr(context, expr)?);
-                }
+                let values = self.eval_expr_collection(context, exprs)?;
                 Ok(Value::Stack(values))
             }
             Expr::QueueExpr(exprs) => {
@@ -603,10 +492,7 @@ impl Evaluator {
             }
             Expr::DataStructureMethodCall(obj_expr, method_name, args) => {
                 let mut obj = self.eval_expr(context, *obj_expr)?;
-                let evaluated_args: Result<Vec<Value>> = args.into_iter()
-                    .map(|arg| self.eval_expr(context, arg))
-                    .collect();
-                let evaluated_args = evaluated_args?;
+                let evaluated_args = self.eval_expr_collection(context, args)?;
 
                 match method_name.as_str() {
                     // ArrayList methods
@@ -1924,7 +1810,7 @@ impl Evaluator {
     fn eval_match(&mut self, context: &mut Context, value: Value, cases: Vec<MatchCase>) -> Result<Value> {
         for (pattern, expr) in cases {
             let mut bindings = HashMap::new();
-            if value.matches_pattern(&pattern, &mut bindings) {
+            if self.matches_pattern_with_guards(&value, &pattern, &mut bindings, context)? {
                 // Create new environment with pattern bindings
                 let old_env = context.env.clone();
                 for (var, val) in bindings {
@@ -1938,6 +1824,43 @@ impl Evaluator {
         }
 
         Err(CarbonError::PatternMatchFailed)
+    }
+
+    /// Enhanced pattern matching that supports guard patterns
+    fn matches_pattern_with_guards(
+        &mut self,
+        value: &Value,
+        pattern: &Pattern,
+        bindings: &mut Environment,
+        context: &mut Context,
+    ) -> Result<bool> {
+        match pattern {
+            Pattern::GuardPat(inner_pattern, guard_expr) => {
+                // First check if the inner pattern matches
+                if value.matches_pattern(inner_pattern, bindings) {
+                    // Create temporary environment with bindings for guard evaluation
+                    let old_env = context.env.clone();
+                    for (var, val) in bindings.iter() {
+                        context.env.insert(var.clone(), val.clone());
+                    }
+
+                    // Evaluate the guard expression
+                    let guard_result = self.eval_expr(context, *guard_expr.clone());
+                    context.env = old_env;
+
+                    match guard_result {
+                        Ok(guard_value) => Ok(guard_value.is_truthy()),
+                        Err(_) => Ok(false), // Guard evaluation failed, pattern doesn't match
+                    }
+                } else {
+                    Ok(false)
+                }
+            }
+            _ => {
+                // For non-guard patterns, use the existing logic
+                Ok(value.matches_pattern(pattern, bindings))
+            }
+        }
     }
 
     // Built-in higher order function implementations
@@ -2873,7 +2796,7 @@ impl Evaluator {
             .clone();
 
         match array {
-            Value::Array(mut values) => {
+            Value::Array(values) => {
                 // Create pairs of (key, value) for sorting
                 let mut keyed_values = Vec::new();
                 for value in values {

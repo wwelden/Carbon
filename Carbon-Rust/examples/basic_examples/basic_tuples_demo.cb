@@ -1,0 +1,4 @@
+print("=== Tuple and Guard Pattern Demonstration ===")
+
+let coord = (10, 20)
+print("Basic tuple: " + toString(coord))
