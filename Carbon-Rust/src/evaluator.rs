@@ -95,6 +95,21 @@ impl Evaluator {
                     )),
                 }
             }
+            Statement::WhileStmt(condition, statements) => {
+                let mut last_value = Value::Null;
+                loop {
+                    let cond_val = self.eval_expr(context, condition.clone())?;
+                    if !cond_val.is_truthy() {
+                        break;
+                    }
+                    for stmt in &statements {
+                        if let Some(val) = self.eval_statement(context, stmt.clone())? {
+                            last_value = val;
+                        }
+                    }
+                }
+                Ok(Some(last_value))
+            }
             Statement::CompoundAssignStmt(var, op, expr) => {
                 let current = context.env.get(&var)
                     .ok_or_else(|| CarbonError::undefined_variable(&var))?

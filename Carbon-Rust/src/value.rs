@@ -127,6 +127,19 @@ impl Value {
                 }
                 true
             }
+            (Value::Int(i), Pattern::RangePat(start, end)) => i >= start && i <= end,
+            (Value::Tuple(values), Pattern::TuplePat(patterns)) => {
+                if values.len() != patterns.len() {
+                    return false;
+                }
+                for (value, pattern) in values.iter().zip(patterns.iter()) {
+                    if !value.matches_pattern(pattern, bindings) {
+                        return false;
+                    }
+                }
+                true
+            }
+            // Guard patterns are handled by the evaluator since they need context
             _ => false,
         }
     }

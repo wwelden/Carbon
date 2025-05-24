@@ -114,14 +114,31 @@ impl Parser {
         self.consume(&Token::LeftParen)?;
         let params = self.parameter_list()?;
         self.consume(&Token::RightParen)?;
+
+        // Check for optional return type annotation
+        let return_type = if self.match_token(&Token::Arrow) {
+            Some(self.parse_type()?)
+        } else {
+            None
+        };
+
         self.consume(&Token::LeftBrace)?;
         let statements = self.statement_list()?;
+
+        // Extract return expression from last statement or default to null
+        let return_expr = if let Some(last_stmt) = statements.last() {
+            match last_stmt {
+                Statement::ReturnStmt(expr) => expr.clone(),
+                Statement::ExprStmt(expr) => expr.clone(),
+                _ => Expr::NullExpr,
+            }
+        } else {
+            Expr::NullExpr
+        };
+
         self.consume(&Token::RightBrace)?;
 
-        // Create a default return expression (null)
-        let return_expr = Expr::NullExpr;
-
-        Ok(Statement::FnDeclStmt(name, params, None, statements, return_expr))
+        Ok(Statement::FnDeclStmt(name, params, return_type, statements, return_expr))
     }
 
     fn class_statement(&mut self) -> Result<Statement> {
@@ -135,13 +152,38 @@ impl Parser {
 
     fn for_statement(&mut self) -> Result<Statement> {
         self.consume(&Token::For)?;
-        let var = self.consume_identifier()?;
-        self.consume(&Token::In)?;
-        let expr = self.expression()?;
-        self.consume(&Token::LeftBrace)?;
-        let statements = self.statement_list()?;
-        self.consume(&Token::RightBrace)?;
-        Ok(Statement::ForInStmt(var, expr, statements))
+
+        // Check if this is a for-in loop or a while-like loop
+        if self.peek_for_in() {
+            // for var in expr { ... }
+            let var = self.consume_identifier()?;
+            self.consume(&Token::In)?;
+            let expr = self.expression()?;
+            self.consume(&Token::LeftBrace)?;
+            let statements = self.statement_list()?;
+            self.consume(&Token::RightBrace)?;
+            Ok(Statement::ForInStmt(var, expr, statements))
+        } else {
+            // for condition { ... } (while-like loop)
+            let condition = self.expression()?;
+            self.consume(&Token::LeftBrace)?;
+            let statements = self.statement_list()?;
+            self.consume(&Token::RightBrace)?;
+            Ok(Statement::WhileStmt(condition, statements))
+        }
+    }
+
+    fn peek_for_in(&self) -> bool {
+        // Look ahead to see if this is "identifier in" pattern
+        if let Token::Identifier(_) = self.peek() {
+            if self.current + 1 < self.tokens.len() {
+                matches!(self.tokens[self.current + 1], Token::In)
+            } else {
+                false
+            }
+        } else {
+            false
+        }
     }
 
     fn return_statement(&mut self) -> Result<Statement> {
@@ -407,8 +449,7 @@ impl Parser {
             // Control structures
             Token::If => self.if_expression(),
             Token::Match => self.match_expression(),
-            Token::For => self.for_in_expression(),
-            Token::While => self.while_expression(),
+            Token::For => self.for_expression_or_while(),
             Token::Function => self.function_expression(),
             Token::New => self.new_expression(),
 
@@ -477,7 +518,18 @@ impl Parser {
         let token = self.advance().clone();
 
         match token {
-            Token::Int(i) => Ok(Pattern::LitPat(Literal::IntLit(i))),
+            Token::Int(i) => {
+                // Check if this is a range pattern
+                if self.match_token(&Token::Dot) && self.match_token(&Token::Dot) {
+                    if let Token::Int(end) = self.advance().clone() {
+                        Ok(Pattern::RangePat(i, end))
+                    } else {
+                        Err(self.error("Expected integer after '..' in range pattern"))
+                    }
+                } else {
+                    Ok(Pattern::LitPat(Literal::IntLit(i)))
+                }
+            }
             Token::Real(r) => Ok(Pattern::LitPat(Literal::RealLit(r))),
             Token::Bool(b) => Ok(Pattern::LitPat(Literal::BoolLit(b))),
             Token::String(s) => Ok(Pattern::LitPat(Literal::StringLit(s))),
@@ -500,34 +552,70 @@ impl Parser {
                 Ok(Pattern::ArrayPat(patterns))
             }
             Token::LeftParen => {
-                let pattern = self.pattern()?;
-                self.consume(&Token::RightParen)?;
-                Ok(pattern)
+                // Check if this is a tuple pattern
+                if self.is_tuple_pattern() {
+                    let mut patterns = Vec::new();
+                    patterns.push(self.pattern()?);
+
+                    self.consume(&Token::Comma)?;
+                    loop {
+                        patterns.push(self.pattern()?);
+                        if !self.match_token(&Token::Comma) {
+                            break;
+                        }
+                    }
+
+                    self.consume(&Token::RightParen)?;
+                    Ok(Pattern::TuplePat(patterns))
+                } else {
+                    let pattern = self.pattern()?;
+                    self.consume(&Token::RightParen)?;
+                    Ok(pattern)
+                }
             }
             _ => Err(self.error(&format!("Invalid pattern: {:?}", token))),
         }
     }
 
-    fn for_in_expression(&mut self) -> Result<Expr> {
-        let var = self.consume_identifier()?;
-        self.consume(&Token::In)?;
-        let array_expr = self.expression()?;
-        self.consume(&Token::LeftBrace)?;
-        let body_expr = self.expression()?;
-        self.consume(&Token::RightBrace)?;
+    fn is_tuple_pattern(&self) -> bool {
+        // Look ahead to see if this is a tuple pattern (has comma before closing paren)
+        let mut lookahead = self.current;
+        let mut paren_count = 1;
 
-        Ok(Expr::ForInExpr(var, Box::new(array_expr), Box::new(body_expr)))
+        while lookahead < self.tokens.len() && paren_count > 0 {
+            match &self.tokens[lookahead] {
+                Token::LeftParen => paren_count += 1,
+                Token::RightParen => paren_count -= 1,
+                Token::Comma if paren_count == 1 => return true,
+                _ => {}
+            }
+            lookahead += 1;
+        }
+
+        false
     }
 
-    fn while_expression(&mut self) -> Result<Expr> {
-        self.consume(&Token::LeftParen)?;
-        let condition = self.expression()?;
-        self.consume(&Token::RightParen)?;
-        self.consume(&Token::LeftBrace)?;
-        let body = self.expression()?;
-        self.consume(&Token::RightBrace)?;
+    fn for_expression_or_while(&mut self) -> Result<Expr> {
+        // Check if this is a for-in expression or a while-like expression
+        if self.peek_for_in() {
+            // for var in expr { ... }
+            let var = self.consume_identifier()?;
+            self.consume(&Token::In)?;
+            let array_expr = self.expression()?;
+            self.consume(&Token::LeftBrace)?;
+            let body_expr = self.expression()?;
+            self.consume(&Token::RightBrace)?;
 
-        Ok(Expr::WhileExpr(Box::new(condition), Box::new(body)))
+            Ok(Expr::ForInExpr(var, Box::new(array_expr), Box::new(body_expr)))
+        } else {
+            // for condition { ... } (while-like expression)
+            let condition = self.expression()?;
+            self.consume(&Token::LeftBrace)?;
+            let body = self.expression()?;
+            self.consume(&Token::RightBrace)?;
+
+            Ok(Expr::WhileExpr(Box::new(condition), Box::new(body)))
+        }
     }
 
     fn function_expression(&mut self) -> Result<Expr> {

@@ -161,6 +161,8 @@ module Evaluator where
         case eval ctx arrayExpr of
             Just (ArrayVal vals, st) -> forInStmtLoop ctx{store = st} var vals stmts
             _ -> Nothing
+    evalStmt ctx (WhileStmt condExpr stmts) =
+        whileStmtLoop ctx condExpr stmts
     evalStmt ctx (CompoundAssignStmt var op expr) =
         case (lookupEnv var (env ctx), eval ctx expr) of
             (Just oldVal, Just (newVal, st)) ->
@@ -456,6 +458,17 @@ module Evaluator where
         in case evalStmtList newCtx stmts of
             Just (ctx2, _) -> forInStmtLoop ctx2 var vs stmts
             Nothing -> Nothing
+
+    whileStmtLoop :: Context -> Expr -> [Statement] -> Maybe (Context, Value)
+    whileStmtLoop ctx condExpr stmts =
+        case eval ctx condExpr of
+            Just (BoolVal True, st) ->
+                let newCtx = ctx{store = st}
+                in case evalStmtList newCtx stmts of
+                    Just (ctx2, _) -> whileStmtLoop ctx2 condExpr stmts
+                    Nothing -> Nothing
+            Just (BoolVal False, st) -> Just (ctx{store = st}, NullVal)
+            _ -> Nothing
 
     evalStmtList :: Context -> [Statement] -> Maybe (Context, Value)
     evalStmtList ctx [] = Just (ctx, NullVal)

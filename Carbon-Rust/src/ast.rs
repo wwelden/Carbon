@@ -14,6 +14,7 @@ pub enum Statement {
     FnDeclStmt(Var, Vec<(Type, Var)>, Option<Type>, Vec<Statement>, Expr),
     ClassStmt(ClassName, Vec<ClassMember>),
     ForInStmt(Var, Expr, Vec<Statement>),
+    WhileStmt(Expr, Vec<Statement>),
     CompoundAssignStmt(Var, CompoundOp, Expr),
     IncrementStmt(Var),
     DecrementStmt(Var),
@@ -107,6 +108,9 @@ pub enum Pattern {
     VarPat(Var),
     WildcardPat,
     ArrayPat(Vec<Pattern>),
+    GuardPat(Box<Pattern>, Box<Expr>), // Pattern with guard condition
+    RangePat(i64, i64), // Range pattern for integers (inclusive)
+    TuplePat(Vec<Pattern>), // Tuple pattern matching
 }
 
 #[derive(Debug, Clone, PartialEq)]

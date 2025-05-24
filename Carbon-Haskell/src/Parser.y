@@ -114,8 +114,10 @@ Statement: Expr ';'                   {ExprStmt $1}
     | const var '=' Expr ';'          {ConstStmt $2 $4}
     | Type var '=' Expr ';'           {TypedVarStmt $1 $2 $4}
     | fn var '(' ParamList ')' '{' StmtList '}' {FnDeclStmt $2 $4 Nothing $7 (VarExpr "null")}
+    | fn var '(' ParamList ')' '=>' Type '{' StmtList '}' {FnDeclStmt $2 $4 (Just $7) $9 (VarExpr "null")}
     | class cname '{' ClassMembers '}' {ClassStmt $2 $4}
     | for var in Expr '{' StmtList '}' {ForInStmt $2 $4 $6}
+    | for '(' Expr ')' '{' StmtList '}' {WhileStmt $3 $6}
     | var '+=' Expr ';'               {CompoundAssignStmt $1 PlusEq $3}
     | var '-=' Expr ';'               {CompoundAssignStmt $1 MinusEq $3}
     | var '*=' Expr ';'               {CompoundAssignStmt $1 MultEq $3}
@@ -181,6 +183,7 @@ Expr: int                         { IntExpr $1 }
     | if Expr '{' Expr '}' else '{' Expr '}' { IfExpr $2 $4 $8 }
     | Expr '?' Expr ':' Expr      { TernaryExpr $1 $3 $5 }
     | for var in Expr '{' Expr '}'    { ForInExpr $2 $4 $6 }
+    | for '(' Expr ')' '{' Expr '}'   { WhileExpr $3 $6 }
     | toString '(' Expr ')'       { ToStringExpr $3 }
     | typeof '(' Expr ')'         { TypeOfExpr $3 }
     | '[' ExprList ']'            { ArrayExpr $2}
@@ -239,6 +242,7 @@ data Statement = ExprStmt Expr
     | FnDeclStmt Var [(Type, Var)] (Maybe Type) [Statement] Expr
     | ClassStmt ClassName [ClassMember]
     | ForInStmt Var Expr [Statement]
+    | WhileStmt Expr [Statement]
     | CompoundAssignStmt Var CompoundOp Expr
     | IncrementStmt Var
     | DecrementStmt Var
