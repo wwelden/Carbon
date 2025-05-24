@@ -1,0 +1,160 @@
+// Comprehensive Carbon Language Demo (Simplified)
+// Showcasing all working features
+
+print("=== Carbon Language Comprehensive Demo ===");
+
+// Basic variables and arithmetic
+let x = 10;
+let y = 5;
+print("Basic arithmetic:");
+print(x + y);
+print(x - y);
+print(x * y);
+print(x / y);
+print(x % y);
+print(x ** y);
+
+// New compound assignment operators
+print("Compound assignment operators:");
+let counter = 100;
+print("Initial counter:");
+print(counter);
+
+counter += 25;
+print("After += 25:");
+print(counter);
+
+counter -= 15;
+print("After -= 15:");
+print(counter);
+
+counter *= 2;
+print("After *= 2:");
+print(counter);
+
+counter /= 4;
+print("After /= 4:");
+print(counter);
+
+counter %= 30;
+print("After %= 30:");
+print(counter);
+
+// Increment and decrement
+print("Increment/decrement:");
+counter++;
+print("After ++:");
+print(counter);
+
+counter--;
+print("After --:");
+print(counter);
+
+// Boolean operations and comparisons
+print("Boolean operations:");
+let a = true;
+let b = false;
+print(a && b);
+print(a || b);
+print(!a);
+print(x > y);
+print(x == y);
+print(x != y);
+
+// Ternary operator
+print("Ternary operator:");
+let result = x > y ? "x is greater" : "y is greater";
+print(result);
+
+// Arrays and for-in loops
+print("Arrays and loops:");
+let numbers = [1, 2, 3, 4, 5];
+print("Array length:");
+print(numbers.len);
+
+print("Array elements:");
+for num in numbers {
+    print(num);
+}
+
+// Arrow functions
+print("Arrow functions:");
+let double = x => x * 2;
+let square = x => x * x;
+
+print("double(7):");
+print(double(7));
+print("square(6):");
+print(square(6));
+
+// Pattern matching
+print("Pattern matching:");
+let value = 42;
+let matchResult = match value {
+    0 => "zero",
+    42 => "answer to everything",
+    _ => "something else"
+};
+print(matchResult);
+
+// Array pattern matching
+let coords = [3, 4];
+let distance = match coords {
+    [x, y] => Math.sqrt(x * x + y * y),
+    _ => 0
+};
+print("Distance from origin:");
+print(distance);
+
+// Go-style error handling (simplified)
+print("Error handling:");
+let errorValue = err("something went wrong");
+let normalValue = 42;
+
+print("Error value:");
+print(errorValue);
+print("Is error?");
+print(isErr(errorValue));
+
+print("Normal value:");
+print(normalValue);
+print("Is error?");
+print(isErr(normalValue));
+
+// Tuples
+print("Tuples:");
+let tuple = (42, "hello", true);
+print(tuple);
+
+// Type checking
+print("Type checking:");
+print(typeof(x));
+print(typeof("hello"));
+print(typeof(true));
+print(typeof(numbers));
+
+// Mathematical constants
+print("Mathematical constants:");
+print("PI:");
+print(PI);
+print("E:");
+print(E);
+print("PHI:");
+print(PHI);
+
+// String operations
+print("String operations:");
+let message = "Carbon is awesome!";
+print(message);
+print(toString(x));
+
+// Complex expressions with new operators
+print("Complex expressions:");
+let complex = 10;
+complex += double(5);
+complex *= 2;
+complex--;
+print("Final complex result:");
+print(complex);
+
+print("=== Demo Complete ===");

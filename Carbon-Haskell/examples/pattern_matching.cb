@@ -1,0 +1,68 @@
+// Carbon Pattern Matching Examples
+// Demonstrates Haskell-like pattern matching with modern syntax
+
+// Basic literal matching
+let value = 42;
+let result1 = match value {
+    42 => "The answer to everything",
+    0 => "Zero",
+    _ => "Some other number"
+};
+print(result1);
+
+// Boolean pattern matching
+let flag = true;
+let status = match flag {
+    true => "enabled",
+    false => "disabled"
+};
+print(status);
+
+// String pattern matching
+let greeting = "hello";
+let response = match greeting {
+    "hello" => "Hi there!",
+    "goodbye" => "See you later!",
+    _ => "I don't understand"
+};
+print(response);
+
+// Variable binding patterns
+let number = 100;
+let doubled = match number {
+    x => x * 2
+};
+print(doubled);
+
+// Array destructuring patterns
+let coordinates = [10, 20, 30];
+let sum = match coordinates {
+    [x, y, z] => x + y + z,
+    _ => 0
+};
+print(sum);
+
+// Mixed pattern matching with arrays
+let data = [1, 2];
+let arrayResult = match data {
+    [1, 2] => "one-two",
+    [a, b] => toString(a) + "-" + toString(b),
+    _ => "unknown pattern"
+};
+print(arrayResult);
+
+// Complex pattern matching with computation
+let testValue = 25;
+let classification = match testValue {
+    0 => "zero",
+    x => x > 50 ? "large" : "small"
+};
+print(classification);
+
+// Null pattern matching
+let maybeValue = null;
+let nullResult = match maybeValue {
+    null => "nothing here",
+    x => "found: " + toString(x)
+};
+print(nullResult);
