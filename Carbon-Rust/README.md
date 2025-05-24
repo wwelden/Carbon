@@ -142,6 +142,8 @@ bin/carbon
 - Inheritance
 - Generics (like java)
 - Pointers
+- Bitwise Operators
+- Binary, Hex, Decimal conversion functions
 
 ## Directory Structure
 
