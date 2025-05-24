@@ -1,0 +1,29 @@
+fn functionName(int c) int {
+	let a = 3
+	let b = 4
+	return a + b + c
+}
+
+fn loop(arr) {
+	for i in arr {
+			if i == 10 {
+					print("hit")
+			}
+	}
+}
+
+fn loopWithIndex(arr) {
+	for i = 0; i < arr.len; i++ {
+			if arr[i] == 10 {
+					print("hit")
+			}
+	}
+}
+
+fn countLoop() {
+	let count = 0
+	for count < 20 {
+        count ++
+			print(count)
+	}
+}

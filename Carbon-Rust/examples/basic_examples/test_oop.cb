@@ -1,0 +1,10 @@
+class Counter {
+    count
+    increment() { return this.count = this.count + 1; }
+    get() { return this.count; }
+}
+
+let myCounter = new Counter(0)
+myCounter.get()
+myCounter.increment()
+myCounter.get()

@@ -1,0 +1,6 @@
+// Test print function
+print(42)
+print("Hello")
+print(true)
+let x = 100
+print(x)

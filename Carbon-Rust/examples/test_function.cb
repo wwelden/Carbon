@@ -1,3 +1,0 @@
-fn add(int x) int {
-    return x + 10;
-}

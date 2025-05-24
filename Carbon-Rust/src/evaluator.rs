@@ -69,6 +69,60 @@ impl Context {
         self.env.insert("intersperse".to_string(), Value::BuiltinFunction("intersperse".to_string()));
         self.env.insert("sortBy".to_string(), Value::BuiltinFunction("sortBy".to_string()));
         self.env.insert("nub".to_string(), Value::BuiltinFunction("nub".to_string()));
+
+        // Math functions
+        self.env.insert("abs".to_string(), Value::BuiltinFunction("abs".to_string()));
+        self.env.insert("floor".to_string(), Value::BuiltinFunction("floor".to_string()));
+        self.env.insert("ceil".to_string(), Value::BuiltinFunction("ceil".to_string()));
+        self.env.insert("round".to_string(), Value::BuiltinFunction("round".to_string()));
+        self.env.insert("sqrt".to_string(), Value::BuiltinFunction("sqrt".to_string()));
+        self.env.insert("pow".to_string(), Value::BuiltinFunction("pow".to_string()));
+        self.env.insert("sin".to_string(), Value::BuiltinFunction("sin".to_string()));
+        self.env.insert("cos".to_string(), Value::BuiltinFunction("cos".to_string()));
+        self.env.insert("tan".to_string(), Value::BuiltinFunction("tan".to_string()));
+        self.env.insert("log".to_string(), Value::BuiltinFunction("log".to_string()));
+        self.env.insert("log10".to_string(), Value::BuiltinFunction("log10".to_string()));
+        self.env.insert("exp".to_string(), Value::BuiltinFunction("exp".to_string()));
+
+        // String functions
+        self.env.insert("length".to_string(), Value::BuiltinFunction("length".to_string()));
+        self.env.insert("toUpperCase".to_string(), Value::BuiltinFunction("toUpperCase".to_string()));
+        self.env.insert("toLowerCase".to_string(), Value::BuiltinFunction("toLowerCase".to_string()));
+        self.env.insert("trim".to_string(), Value::BuiltinFunction("trim".to_string()));
+        self.env.insert("split".to_string(), Value::BuiltinFunction("split".to_string()));
+        self.env.insert("join".to_string(), Value::BuiltinFunction("join".to_string()));
+        self.env.insert("substring".to_string(), Value::BuiltinFunction("substring".to_string()));
+        self.env.insert("indexOf".to_string(), Value::BuiltinFunction("indexOf".to_string()));
+        self.env.insert("replace".to_string(), Value::BuiltinFunction("replace".to_string()));
+        self.env.insert("startsWith".to_string(), Value::BuiltinFunction("startsWith".to_string()));
+        self.env.insert("endsWith".to_string(), Value::BuiltinFunction("endsWith".to_string()));
+
+        // Array utility functions
+        self.env.insert("empty".to_string(), Value::BuiltinFunction("empty".to_string()));
+        self.env.insert("length".to_string(), Value::BuiltinFunction("length".to_string()));
+        self.env.insert("concat".to_string(), Value::BuiltinFunction("concat".to_string()));
+        self.env.insert("flatten".to_string(), Value::BuiltinFunction("flatten".to_string()));
+        self.env.insert("indexOf".to_string(), Value::BuiltinFunction("indexOf".to_string()));
+        self.env.insert("includes".to_string(), Value::BuiltinFunction("includes".to_string()));
+        self.env.insert("slice".to_string(), Value::BuiltinFunction("slice".to_string()));
+
+        // Type checking functions
+        self.env.insert("isNumber".to_string(), Value::BuiltinFunction("isNumber".to_string()));
+        self.env.insert("isString".to_string(), Value::BuiltinFunction("isString".to_string()));
+        self.env.insert("isBool".to_string(), Value::BuiltinFunction("isBool".to_string()));
+        self.env.insert("isArray".to_string(), Value::BuiltinFunction("isArray".to_string()));
+        self.env.insert("isFunction".to_string(), Value::BuiltinFunction("isFunction".to_string()));
+        self.env.insert("isNull".to_string(), Value::BuiltinFunction("isNull".to_string()));
+        self.env.insert("isObject".to_string(), Value::BuiltinFunction("isObject".to_string()));
+
+        // Random functions
+        self.env.insert("random".to_string(), Value::BuiltinFunction("random".to_string()));
+        self.env.insert("randomInt".to_string(), Value::BuiltinFunction("randomInt".to_string()));
+
+        // Conversion functions
+        self.env.insert("toInt".to_string(), Value::BuiltinFunction("toInt".to_string()));
+        self.env.insert("toFloat".to_string(), Value::BuiltinFunction("toFloat".to_string()));
+        self.env.insert("toBool".to_string(), Value::BuiltinFunction("toBool".to_string()));
     }
 }
 
@@ -95,7 +149,17 @@ impl Evaluator {
                 context.env.insert(var, value);
                 Ok(Some(Value::Null))
             }
+            Statement::VarStmt(var, expr) => {
+                let value = self.eval_expr(context, expr)?;
+                context.env.insert(var, value);
+                Ok(Some(Value::Null))
+            }
             Statement::TypedVarStmt(_, var, expr) => {
+                let value = self.eval_expr(context, expr)?;
+                context.env.insert(var, value);
+                Ok(Some(Value::Null))
+            }
+            Statement::TypedLetStmt(_, var, expr) => {
                 let value = self.eval_expr(context, expr)?;
                 context.env.insert(var, value);
                 Ok(Some(Value::Null))
@@ -329,6 +393,42 @@ impl Evaluator {
                     }
                     "__builtin_nub_implementation" => {
                         self.builtin_nub_implementation(context)
+                    }
+                    "__builtin_pow_implementation" => {
+                        self.builtin_pow_implementation(context)
+                    }
+                    "__builtin_split_implementation" => {
+                        self.builtin_split_implementation(context)
+                    }
+                    "__builtin_join_implementation" => {
+                        self.builtin_join_implementation(context)
+                    }
+                    "__builtin_substring_implementation" => {
+                        self.builtin_substring_implementation(context)
+                    }
+                    "__builtin_indexof_implementation" => {
+                        self.builtin_indexof_implementation(context)
+                    }
+                    "__builtin_replace_implementation" => {
+                        self.builtin_replace_implementation(context)
+                    }
+                    "__builtin_startswith_implementation" => {
+                        self.builtin_startswith_implementation(context)
+                    }
+                    "__builtin_endswith_implementation" => {
+                        self.builtin_endswith_implementation(context)
+                    }
+                    "__builtin_concat_implementation" => {
+                        self.builtin_concat_implementation(context)
+                    }
+                    "__builtin_includes_implementation" => {
+                        self.builtin_includes_implementation(context)
+                    }
+                    "__builtin_slice_implementation" => {
+                        self.builtin_slice_implementation(context)
+                    }
+                    "__builtin_randomint_implementation" => {
+                        self.builtin_randomint_implementation(context)
                     }
                     _ => {
                         context.env.get(&name)
@@ -1496,6 +1596,327 @@ impl Evaluator {
                     _ => Err(CarbonError::type_error("nub requires an array"))
                 }
             }
+
+            // Math functions
+            "abs" => match arg {
+                Value::Int(i) => Ok(Value::Int(i.abs())),
+                Value::Real(f) => Ok(Value::Real(f.abs())),
+                _ => Err(CarbonError::type_error("abs requires a number"))
+            },
+            "floor" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.floor())),
+                Value::Int(i) => Ok(Value::Real(i as f64)),
+                _ => Err(CarbonError::type_error("floor requires a number"))
+            },
+            "ceil" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.ceil())),
+                Value::Int(i) => Ok(Value::Real(i as f64)),
+                _ => Err(CarbonError::type_error("ceil requires a number"))
+            },
+            "round" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.round())),
+                Value::Int(i) => Ok(Value::Real(i as f64)),
+                _ => Err(CarbonError::type_error("round requires a number"))
+            },
+            "sqrt" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.sqrt())),
+                Value::Int(i) => Ok(Value::Real((i as f64).sqrt())),
+                _ => Err(CarbonError::type_error("sqrt requires a number"))
+            },
+            "sin" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.sin())),
+                Value::Int(i) => Ok(Value::Real((i as f64).sin())),
+                _ => Err(CarbonError::type_error("sin requires a number"))
+            },
+            "cos" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.cos())),
+                Value::Int(i) => Ok(Value::Real((i as f64).cos())),
+                _ => Err(CarbonError::type_error("cos requires a number"))
+            },
+            "tan" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.tan())),
+                Value::Int(i) => Ok(Value::Real((i as f64).tan())),
+                _ => Err(CarbonError::type_error("tan requires a number"))
+            },
+            "log" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.ln())),
+                Value::Int(i) => Ok(Value::Real((i as f64).ln())),
+                _ => Err(CarbonError::type_error("log requires a number"))
+            },
+            "log10" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.log10())),
+                Value::Int(i) => Ok(Value::Real((i as f64).log10())),
+                _ => Err(CarbonError::type_error("log10 requires a number"))
+            },
+            "exp" => match arg {
+                Value::Real(f) => Ok(Value::Real(f.exp())),
+                Value::Int(i) => Ok(Value::Real((i as f64).exp())),
+                _ => Err(CarbonError::type_error("exp requires a number"))
+            },
+            "pow" => {
+                // pow(base) returns a function that takes exponent
+                let captured_base = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_pow_base".to_string(), captured_base);
+
+                Ok(Value::Function {
+                    env,
+                    param: "exponent".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_pow_implementation".to_string())),
+                })
+            },
+
+            // String functions
+            "toUpperCase" => match arg {
+                Value::String(s) => Ok(Value::String(s.to_uppercase())),
+                _ => Err(CarbonError::type_error("toUpperCase requires a string"))
+            },
+            "toLowerCase" => match arg {
+                Value::String(s) => Ok(Value::String(s.to_lowercase())),
+                _ => Err(CarbonError::type_error("toLowerCase requires a string"))
+            },
+            "trim" => match arg {
+                Value::String(s) => Ok(Value::String(s.trim().to_string())),
+                _ => Err(CarbonError::type_error("trim requires a string"))
+            },
+            "split" => {
+                // split(string) returns a function that takes delimiter
+                let captured_string = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_split_string".to_string(), captured_string);
+
+                Ok(Value::Function {
+                    env,
+                    param: "delimiter".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_split_implementation".to_string())),
+                })
+            },
+            "join" => {
+                // join(delimiter) returns a function that takes array
+                let captured_delimiter = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_join_delimiter".to_string(), captured_delimiter);
+
+                Ok(Value::Function {
+                    env,
+                    param: "array".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_join_implementation".to_string())),
+                })
+            },
+            "substring" => {
+                // substring(string) returns a function that takes start, then end
+                let captured_string = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_substring_string".to_string(), captured_string);
+
+                Ok(Value::Function {
+                    env,
+                    param: "start".to_string(),
+                    body: Box::new(Expr::FuncExpr(
+                        "end".to_string(),
+                        Box::new(Expr::VarExpr("__builtin_substring_implementation".to_string()))
+                    )),
+                })
+            },
+            "indexOf" => {
+                // indexOf(string) returns a function that takes substring
+                let captured_string = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_indexof_string".to_string(), captured_string);
+
+                Ok(Value::Function {
+                    env,
+                    param: "substring".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_indexof_implementation".to_string())),
+                })
+            },
+            "replace" => {
+                // replace(string) returns a function that takes old, then new
+                let captured_string = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_replace_string".to_string(), captured_string);
+
+                Ok(Value::Function {
+                    env,
+                    param: "old".to_string(),
+                    body: Box::new(Expr::FuncExpr(
+                        "new".to_string(),
+                        Box::new(Expr::VarExpr("__builtin_replace_implementation".to_string()))
+                    )),
+                })
+            },
+            "startsWith" => {
+                // startsWith(string) returns a function that takes prefix
+                let captured_string = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_startswith_string".to_string(), captured_string);
+
+                Ok(Value::Function {
+                    env,
+                    param: "prefix".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_startswith_implementation".to_string())),
+                })
+            },
+            "endsWith" => {
+                // endsWith(string) returns a function that takes suffix
+                let captured_string = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_endswith_string".to_string(), captured_string);
+
+                Ok(Value::Function {
+                    env,
+                    param: "suffix".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_endswith_implementation".to_string())),
+                })
+            },
+
+            // Array utility functions
+            "empty" => match arg {
+                Value::Array(arr) => Ok(Value::Bool(arr.is_empty())),
+                Value::ArrayList(list) => Ok(Value::Bool(list.is_empty())),
+                Value::String(s) => Ok(Value::Bool(s.is_empty())),
+                _ => Err(CarbonError::type_error("empty requires an array or string"))
+            },
+            "flatten" => match arg {
+                Value::Array(arr) => {
+                    let mut result = Vec::new();
+                    for item in arr {
+                        match item {
+                            Value::Array(inner) => result.extend(inner),
+                            other => result.push(other),
+                        }
+                    }
+                    Ok(Value::Array(result))
+                },
+                _ => Err(CarbonError::type_error("flatten requires an array"))
+            },
+            "concat" => {
+                // concat(array1) returns a function that takes array2
+                let captured_array1 = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_concat_array1".to_string(), captured_array1);
+
+                Ok(Value::Function {
+                    env,
+                    param: "array2".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_concat_implementation".to_string())),
+                })
+            },
+            "includes" => {
+                // includes(array) returns a function that takes element
+                let captured_array = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_includes_array".to_string(), captured_array);
+
+                Ok(Value::Function {
+                    env,
+                    param: "element".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_includes_implementation".to_string())),
+                })
+            },
+            "slice" => {
+                // slice(array) returns a function that takes start, then end
+                let captured_array = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_slice_array".to_string(), captured_array);
+
+                Ok(Value::Function {
+                    env,
+                    param: "start".to_string(),
+                    body: Box::new(Expr::FuncExpr(
+                        "end".to_string(),
+                        Box::new(Expr::VarExpr("__builtin_slice_implementation".to_string()))
+                    )),
+                })
+            },
+
+            // Type checking functions
+            "isNumber" => Ok(Value::Bool(matches!(arg, Value::Int(_) | Value::Real(_)))),
+            "isString" => Ok(Value::Bool(matches!(arg, Value::String(_)))),
+            "isBool" => Ok(Value::Bool(matches!(arg, Value::Bool(_)))),
+            "isArray" => Ok(Value::Bool(matches!(arg, Value::Array(_) | Value::ArrayList(_)))),
+            "isFunction" => Ok(Value::Bool(matches!(arg, Value::Function { .. } | Value::TypedFunction { .. } | Value::BuiltinFunction(_)))),
+            "isNull" => Ok(Value::Bool(matches!(arg, Value::Null))),
+            "isObject" => Ok(Value::Bool(matches!(arg, Value::Object { .. }))),
+
+                        // Random functions
+            "random" => {
+                // Ignore the argument and return a random float between 0 and 1
+                use std::collections::hash_map::DefaultHasher;
+                use std::hash::{Hash, Hasher};
+                use std::time::{SystemTime, UNIX_EPOCH};
+
+                let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+                let mut hasher = DefaultHasher::new();
+                now.hash(&mut hasher);
+                let hash = hasher.finish();
+                let random_value = (hash as f64) / (u64::MAX as f64);
+                Ok(Value::Real(random_value))
+            },
+            "randomInt" => {
+                // randomInt(max) returns a random integer from 0 to max-1
+                let captured_max = arg;
+
+                let mut env = context.env.clone();
+                env.insert("__captured_randomint_max".to_string(), captured_max);
+
+                Ok(Value::Function {
+                    env,
+                    param: "_".to_string(),
+                    body: Box::new(Expr::VarExpr("__builtin_randomint_implementation".to_string())),
+                })
+            },
+            "length" => match arg {
+                Value::String(s) => Ok(Value::Int(s.len() as i64)),
+                Value::Array(arr) => Ok(Value::Int(arr.len() as i64)),
+                Value::ArrayList(list) => Ok(Value::Int(list.len() as i64)),
+                _ => Err(CarbonError::type_error("length requires a string or array"))
+            },
+
+            // Conversion functions
+            "toInt" => match arg {
+                Value::Int(i) => Ok(Value::Int(i)),
+                Value::Real(f) => Ok(Value::Int(f as i64)),
+                Value::String(s) => match s.parse::<i64>() {
+                    Ok(i) => Ok(Value::Int(i)),
+                    Err(_) => Err(CarbonError::type_error("Cannot convert string to integer"))
+                },
+                Value::Bool(true) => Ok(Value::Int(1)),
+                Value::Bool(false) => Ok(Value::Int(0)),
+                _ => Err(CarbonError::type_error("Cannot convert to integer"))
+            },
+            "toFloat" => match arg {
+                Value::Int(i) => Ok(Value::Real(i as f64)),
+                Value::Real(f) => Ok(Value::Real(f)),
+                Value::String(s) => match s.parse::<f64>() {
+                    Ok(f) => Ok(Value::Real(f)),
+                    Err(_) => Err(CarbonError::type_error("Cannot convert string to float"))
+                },
+                Value::Bool(true) => Ok(Value::Real(1.0)),
+                Value::Bool(false) => Ok(Value::Real(0.0)),
+                _ => Err(CarbonError::type_error("Cannot convert to float"))
+            },
+            "toBool" => match arg {
+                Value::Bool(b) => Ok(Value::Bool(b)),
+                Value::Int(i) => Ok(Value::Bool(i != 0)),
+                Value::Real(f) => Ok(Value::Bool(f != 0.0)),
+                Value::String(s) => Ok(Value::Bool(!s.is_empty())),
+                Value::Null => Ok(Value::Bool(false)),
+                Value::Array(arr) => Ok(Value::Bool(!arr.is_empty())),
+                _ => Ok(Value::Bool(true))
+            },
+
             _ => Err(CarbonError::runtime_error(&format!("Unknown built-in function: {}", name))),
         }
     }
@@ -2482,5 +2903,250 @@ impl Evaluator {
     fn builtin_nub_implementation(&mut self, context: &mut Context) -> Result<Value> {
         // nub is an alias for unique, so we reuse the unique implementation
         self.builtin_unique_implementation(context)
+    }
+
+    fn builtin_pow_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let base = context.env.get("__captured_pow_base")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured base for pow"))?
+            .clone();
+        let exponent = context.env.get("exponent")
+            .ok_or_else(|| CarbonError::runtime_error("Missing exponent parameter for pow"))?
+            .clone();
+
+        match (base, exponent) {
+            (Value::Int(b), Value::Int(e)) => Ok(Value::Real((b as f64).powf(e as f64))),
+            (Value::Real(b), Value::Int(e)) => Ok(Value::Real(b.powf(e as f64))),
+            (Value::Int(b), Value::Real(e)) => Ok(Value::Real((b as f64).powf(e))),
+            (Value::Real(b), Value::Real(e)) => Ok(Value::Real(b.powf(e))),
+            _ => Err(CarbonError::type_error("pow requires numbers")),
+        }
+    }
+
+    fn builtin_split_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let string = context.env.get("__captured_split_string")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured string for split"))?
+            .clone();
+        let delimiter = context.env.get("delimiter")
+            .ok_or_else(|| CarbonError::runtime_error("Missing delimiter parameter for split"))?
+            .clone();
+
+        match (string, delimiter) {
+            (Value::String(s), Value::String(d)) => {
+                let parts: Vec<Value> = s.split(&d).map(|part| Value::String(part.to_string())).collect();
+                Ok(Value::Array(parts))
+            }
+            _ => Err(CarbonError::type_error("split requires strings")),
+        }
+    }
+
+    fn builtin_join_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let delimiter = context.env.get("__captured_join_delimiter")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured delimiter for join"))?
+            .clone();
+        let array = context.env.get("array")
+            .ok_or_else(|| CarbonError::runtime_error("Missing array parameter for join"))?
+            .clone();
+
+        match (delimiter, array) {
+            (Value::String(d), Value::Array(arr)) => {
+                let strings: Vec<String> = arr.iter().map(|v| v.to_string()).collect();
+                Ok(Value::String(strings.join(&d)))
+            }
+            _ => Err(CarbonError::type_error("join requires a string delimiter and array")),
+        }
+    }
+
+    fn builtin_substring_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let string = context.env.get("__captured_substring_string")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured string for substring"))?
+            .clone();
+        let start = context.env.get("start")
+            .ok_or_else(|| CarbonError::runtime_error("Missing start parameter for substring"))?
+            .clone();
+        let end = context.env.get("end")
+            .ok_or_else(|| CarbonError::runtime_error("Missing end parameter for substring"))?
+            .clone();
+
+        match (string, start, end) {
+            (Value::String(s), Value::Int(start_idx), Value::Int(end_idx)) => {
+                let start_idx = start_idx.max(0) as usize;
+                let end_idx = end_idx.max(0) as usize;
+                let len = s.len();
+
+                if start_idx >= len {
+                    Ok(Value::String("".to_string()))
+                } else {
+                    let end_idx = end_idx.min(len);
+                    Ok(Value::String(s[start_idx..end_idx].to_string()))
+                }
+            }
+            _ => Err(CarbonError::type_error("substring requires a string and integer indices")),
+        }
+    }
+
+    fn builtin_indexof_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let string = context.env.get("__captured_indexof_string")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured string for indexOf"))?
+            .clone();
+        let substring = context.env.get("substring")
+            .ok_or_else(|| CarbonError::runtime_error("Missing substring parameter for indexOf"))?
+            .clone();
+
+        match (string, substring) {
+            (Value::String(s), Value::String(sub)) => {
+                match s.find(&sub) {
+                    Some(idx) => Ok(Value::Int(idx as i64)),
+                    None => Ok(Value::Int(-1)),
+                }
+            }
+            (Value::Array(arr), element) => {
+                for (i, item) in arr.iter().enumerate() {
+                    if self.values_equal(item, &element) {
+                        return Ok(Value::Int(i as i64));
+                    }
+                }
+                Ok(Value::Int(-1))
+            }
+            _ => Err(CarbonError::type_error("indexOf requires a string and substring, or array and element")),
+        }
+    }
+
+    fn builtin_replace_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let string = context.env.get("__captured_replace_string")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured string for replace"))?
+            .clone();
+        let old = context.env.get("old")
+            .ok_or_else(|| CarbonError::runtime_error("Missing old parameter for replace"))?
+            .clone();
+        let new = context.env.get("new")
+            .ok_or_else(|| CarbonError::runtime_error("Missing new parameter for replace"))?
+            .clone();
+
+        match (string, old, new) {
+            (Value::String(s), Value::String(old_str), Value::String(new_str)) => {
+                Ok(Value::String(s.replace(&old_str, &new_str)))
+            }
+            _ => Err(CarbonError::type_error("replace requires strings")),
+        }
+    }
+
+    fn builtin_startswith_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let string = context.env.get("__captured_startswith_string")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured string for startsWith"))?
+            .clone();
+        let prefix = context.env.get("prefix")
+            .ok_or_else(|| CarbonError::runtime_error("Missing prefix parameter for startsWith"))?
+            .clone();
+
+        match (string, prefix) {
+            (Value::String(s), Value::String(p)) => {
+                Ok(Value::Bool(s.starts_with(&p)))
+            }
+            _ => Err(CarbonError::type_error("startsWith requires strings")),
+        }
+    }
+
+    fn builtin_endswith_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let string = context.env.get("__captured_endswith_string")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured string for endsWith"))?
+            .clone();
+        let suffix = context.env.get("suffix")
+            .ok_or_else(|| CarbonError::runtime_error("Missing suffix parameter for endsWith"))?
+            .clone();
+
+        match (string, suffix) {
+            (Value::String(s), Value::String(suf)) => {
+                Ok(Value::Bool(s.ends_with(&suf)))
+            }
+            _ => Err(CarbonError::type_error("endsWith requires strings")),
+        }
+    }
+
+    fn builtin_concat_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let array1 = context.env.get("__captured_concat_array1")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured array1 for concat"))?
+            .clone();
+        let array2 = context.env.get("array2")
+            .ok_or_else(|| CarbonError::runtime_error("Missing array2 parameter for concat"))?
+            .clone();
+
+        match (array1, array2) {
+            (Value::Array(mut arr1), Value::Array(arr2)) => {
+                arr1.extend(arr2);
+                Ok(Value::Array(arr1))
+            }
+            _ => Err(CarbonError::type_error("concat requires arrays")),
+        }
+    }
+
+    fn builtin_includes_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let array = context.env.get("__captured_includes_array")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured array for includes"))?
+            .clone();
+        let element = context.env.get("element")
+            .ok_or_else(|| CarbonError::runtime_error("Missing element parameter for includes"))?
+            .clone();
+
+        match array {
+            Value::Array(arr) => {
+                for item in arr {
+                    if self.values_equal(&item, &element) {
+                        return Ok(Value::Bool(true));
+                    }
+                }
+                Ok(Value::Bool(false))
+            }
+            _ => Err(CarbonError::type_error("includes requires an array")),
+        }
+    }
+
+    fn builtin_slice_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let array = context.env.get("__captured_slice_array")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured array for slice"))?
+            .clone();
+        let start = context.env.get("start")
+            .ok_or_else(|| CarbonError::runtime_error("Missing start parameter for slice"))?
+            .clone();
+        let end = context.env.get("end")
+            .ok_or_else(|| CarbonError::runtime_error("Missing end parameter for slice"))?
+            .clone();
+
+        match (array, start, end) {
+            (Value::Array(arr), Value::Int(start_idx), Value::Int(end_idx)) => {
+                let start_idx = start_idx.max(0) as usize;
+                let end_idx = end_idx.max(0) as usize;
+                let len = arr.len();
+
+                if start_idx >= len {
+                    Ok(Value::Array(vec![]))
+                } else {
+                    let end_idx = end_idx.min(len);
+                    Ok(Value::Array(arr[start_idx..end_idx].to_vec()))
+                }
+            }
+            _ => Err(CarbonError::type_error("slice requires an array and integer indices")),
+        }
+    }
+
+    fn builtin_randomint_implementation(&mut self, context: &mut Context) -> Result<Value> {
+        let max = context.env.get("__captured_randomint_max")
+            .ok_or_else(|| CarbonError::runtime_error("Missing captured max for randomInt"))?
+            .clone();
+
+        match max {
+            Value::Int(max_val) => {
+                use std::collections::hash_map::DefaultHasher;
+                use std::hash::{Hash, Hasher};
+                use std::time::{SystemTime, UNIX_EPOCH};
+
+                let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+                let mut hasher = DefaultHasher::new();
+                now.hash(&mut hasher);
+                let hash = hasher.finish();
+                let random_value = (hash % (max_val as u64)) as i64;
+                Ok(Value::Int(random_value))
+            }
+            _ => Err(CarbonError::type_error("randomInt requires an integer")),
+        }
     }
 }

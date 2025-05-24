@@ -36,6 +36,7 @@ impl Parser {
         match &self.peek() {
             Token::Let => self.let_statement(),
             Token::Const => self.const_statement(),
+            Token::Var => self.var_statement(),
             Token::IntType | Token::BoolType | Token::StringType => self.typed_var_statement(),
             Token::Fn => self.fn_declaration(),
             Token::Class => self.class_statement(),
@@ -83,11 +84,23 @@ impl Parser {
 
     fn let_statement(&mut self) -> Result<Statement> {
         self.consume(&Token::Let)?;
-        let name = self.consume_identifier()?;
-        self.consume(&Token::Assign)?;
-        let expr = self.expression()?;
-        self.consume_semicolon()?;
-        Ok(Statement::LetStmt(name, expr))
+
+        // Check if this is a typed let statement: let int x = 42
+        if matches!(self.peek(), Token::IntType | Token::BoolType | Token::StringType) {
+            let var_type = self.parse_type()?;
+            let name = self.consume_identifier()?;
+            self.consume(&Token::Assign)?;
+            let expr = self.expression()?;
+            self.consume_semicolon()?;
+            Ok(Statement::TypedLetStmt(var_type, name, expr))
+        } else {
+            // Regular let statement: let x = 42
+            let name = self.consume_identifier()?;
+            self.consume(&Token::Assign)?;
+            let expr = self.expression()?;
+            self.consume_semicolon()?;
+            Ok(Statement::LetStmt(name, expr))
+        }
     }
 
     fn const_statement(&mut self) -> Result<Statement> {
@@ -97,6 +110,15 @@ impl Parser {
         let expr = self.expression()?;
         self.consume_semicolon()?;
         Ok(Statement::ConstStmt(name, expr))
+    }
+
+    fn var_statement(&mut self) -> Result<Statement> {
+        self.consume(&Token::Var)?;
+        let name = self.consume_identifier()?;
+        self.consume(&Token::Assign)?;
+        let expr = self.expression()?;
+        self.consume_semicolon()?;
+        Ok(Statement::VarStmt(name, expr))
     }
 
     fn typed_var_statement(&mut self) -> Result<Statement> {
@@ -361,17 +383,37 @@ impl Parser {
                 self.consume(&Token::RightParen)?;
                 expr = Expr::ApplyExpr(Box::new(expr), Box::new(arg));
             } else if self.match_token(&Token::Dot) {
-                if self.match_token(&Token::Identifier("len".to_string())) {
+                let method_name = self.consume_identifier()?;
+                if method_name == "len" {
                     expr = Expr::ArrayLenExpr(Box::new(expr));
-                } else {
-                    let field = self.consume_identifier()?;
-                    if self.match_token(&Token::LeftParen) {
-                        let arg = self.expression()?;
-                        self.consume(&Token::RightParen)?;
-                        expr = Expr::MethodCallExpr(Box::new(expr), field, Box::new(arg));
-                    } else {
-                        expr = Expr::FieldAccessExpr(Box::new(expr), field);
+                } else if self.match_token(&Token::LeftParen) {
+                    // Handle method calls with multiple arguments
+                    let mut args = Vec::new();
+
+                    if !self.check(&Token::RightParen) {
+                        loop {
+                            args.push(self.expression()?);
+                            if !self.match_token(&Token::Comma) {
+                                break;
+                            }
+                        }
                     }
+
+                    self.consume(&Token::RightParen)?;
+
+                    // Check if this is a data structure method call or regular method call
+                    if self.is_data_structure_method(&method_name) {
+                        expr = Expr::DataStructureMethodCall(Box::new(expr), method_name, args);
+                    } else if args.len() == 1 {
+                        // Traditional single-argument method call
+                        expr = Expr::MethodCallExpr(Box::new(expr), method_name, Box::new(args[0].clone()));
+                    } else if args.is_empty() {
+                        return Err(self.error("Method calls require at least one argument"));
+                    } else {
+                        return Err(self.error("Traditional method calls only support single arguments"));
+                    }
+                } else {
+                    expr = Expr::FieldAccessExpr(Box::new(expr), method_name);
                 }
             } else {
                 break;
@@ -381,7 +423,15 @@ impl Parser {
         Ok(expr)
     }
 
-        fn primary(&mut self) -> Result<Expr> {
+    fn is_data_structure_method(&self, method_name: &str) -> bool {
+        matches!(method_name,
+            "push" | "pop" | "get" | "set" | "add" | "contains" | "remove" |
+            "put" | "containsKey" | "enqueue" | "dequeue" | "front" | "peek" |
+            "prepend" | "head" | "size" | "isEmpty"
+        )
+    }
+
+    fn primary(&mut self) -> Result<Expr> {
         let token = self.advance().clone();
 
         match token {
@@ -455,7 +505,10 @@ impl Parser {
 
             // Grouping and arrays
             Token::LeftParen => {
-                if self.is_tuple() {
+                if self.is_lambda() {
+                    // Multi-parameter lambda: (x, y) => x + y
+                    self.multi_param_lambda()
+                } else if self.is_tuple() {
                     self.tuple_expression()
                 } else {
                     let expr = self.expression()?;
@@ -464,6 +517,14 @@ impl Parser {
                 }
             }
             Token::LeftBracket => self.array_expression(),
+
+            // Data structure constructors
+            Token::ArrayListType => self.arraylist_expression(),
+            Token::SetType => self.set_expression(),
+            Token::MapType => self.map_expression(),
+            Token::StackType => self.stack_expression(),
+            Token::QueueType => self.queue_expression(),
+            Token::LinkedListType => self.linkedlist_expression(),
 
             _ => Err(self.error(&format!("Unexpected token: {:?}", token))),
         }
@@ -514,7 +575,7 @@ impl Parser {
         Ok(cases)
     }
 
-        fn pattern(&mut self) -> Result<Pattern> {
+    fn pattern(&mut self) -> Result<Pattern> {
         let token = self.advance().clone();
 
         match token {
@@ -646,10 +707,10 @@ impl Parser {
     }
 
     fn tuple_expression(&mut self) -> Result<Expr> {
-        let expr = self.expression()?;
-        self.consume(&Token::Comma)?;
-        let mut exprs = vec![expr];
+        let mut exprs = Vec::new();
+        exprs.push(self.expression()?);
 
+        self.consume(&Token::Comma)?;
         loop {
             exprs.push(self.expression()?);
             if !self.match_token(&Token::Comma) {
@@ -683,6 +744,44 @@ impl Parser {
             Token::IntType => Type::IntType,
             Token::BoolType => Type::BoolType,
             Token::StringType => Type::StringType,
+            Token::ArrayListType => {
+                self.consume(&Token::Less)?;
+                let inner_type = self.parse_type()?;
+                self.consume(&Token::Greater)?;
+                return Ok(Type::ArrayListType(Box::new(inner_type)));
+            }
+            Token::SetType => {
+                self.consume(&Token::Less)?;
+                let inner_type = self.parse_type()?;
+                self.consume(&Token::Greater)?;
+                return Ok(Type::SetType(Box::new(inner_type)));
+            }
+            Token::MapType => {
+                self.consume(&Token::Less)?;
+                let key_type = self.parse_type()?;
+                self.consume(&Token::Comma)?;
+                let value_type = self.parse_type()?;
+                self.consume(&Token::Greater)?;
+                return Ok(Type::MapType(Box::new(key_type), Box::new(value_type)));
+            }
+            Token::StackType => {
+                self.consume(&Token::Less)?;
+                let inner_type = self.parse_type()?;
+                self.consume(&Token::Greater)?;
+                return Ok(Type::StackType(Box::new(inner_type)));
+            }
+            Token::QueueType => {
+                self.consume(&Token::Less)?;
+                let inner_type = self.parse_type()?;
+                self.consume(&Token::Greater)?;
+                return Ok(Type::QueueType(Box::new(inner_type)));
+            }
+            Token::LinkedListType => {
+                self.consume(&Token::Less)?;
+                let inner_type = self.parse_type()?;
+                self.consume(&Token::Greater)?;
+                return Ok(Type::LinkedListType(Box::new(inner_type)));
+            }
             _ => return Err(self.error("Expected type")),
         };
 
@@ -741,6 +840,30 @@ impl Parser {
         }
     }
 
+    fn is_lambda(&self) -> bool {
+        // Look ahead to see if this is a lambda: (params...) =>
+        let mut lookahead = self.current;
+        let mut paren_count = 1;
+
+        while lookahead < self.tokens.len() && paren_count > 0 {
+            match &self.tokens[lookahead] {
+                Token::LeftParen => paren_count += 1,
+                Token::RightParen => {
+                    paren_count -= 1;
+                    if paren_count == 0 {
+                        // Check if next token is arrow
+                        return lookahead + 1 < self.tokens.len() &&
+                               matches!(self.tokens[lookahead + 1], Token::Arrow);
+                    }
+                }
+                _ => {}
+            }
+            lookahead += 1;
+        }
+
+        false
+    }
+
     fn is_tuple(&self) -> bool {
         // Look ahead to see if this is a tuple (has comma before closing paren)
         let mut lookahead = self.current;
@@ -757,6 +880,35 @@ impl Parser {
         }
 
         false
+    }
+
+    fn multi_param_lambda(&mut self) -> Result<Expr> {
+        // Parse (param1, param2, ...) => body
+        let mut params = Vec::new();
+
+        if !self.check(&Token::RightParen) {
+            loop {
+                let param = self.consume_identifier()?;
+                params.push(param);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightParen)?;
+        self.consume(&Token::Arrow)?;
+
+        let body = self.expression()?;
+
+        // For now, create nested single-parameter functions for multi-param lambdas
+        // (x, y) => x + y becomes x => y => x + y
+        let mut result = body;
+        for param in params.into_iter().rev() {
+            result = Expr::FuncExpr(param, Box::new(result));
+        }
+
+        Ok(result)
     }
 
     fn consume_semicolon(&mut self) -> Result<()> {
@@ -831,5 +983,112 @@ impl Parser {
 
     fn error(&self, message: &str) -> CarbonError {
         CarbonError::parser_error(message, self.line, self.column)
+    }
+
+    // Data structure parsing methods
+    fn arraylist_expression(&mut self) -> Result<Expr> {
+        self.consume(&Token::LeftBracket)?;
+        let mut exprs = Vec::new();
+
+        if !self.check(&Token::RightBracket) {
+            loop {
+                exprs.push(self.expression()?);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightBracket)?;
+        Ok(Expr::ArrayListExpr(exprs))
+    }
+
+    fn set_expression(&mut self) -> Result<Expr> {
+        self.consume(&Token::LeftBrace)?;
+        let mut exprs = Vec::new();
+
+        if !self.check(&Token::RightBrace) {
+            loop {
+                exprs.push(self.expression()?);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightBrace)?;
+        Ok(Expr::SetExpr(exprs))
+    }
+
+    fn map_expression(&mut self) -> Result<Expr> {
+        self.consume(&Token::LeftBrace)?;
+        let mut pairs = Vec::new();
+
+        if !self.check(&Token::RightBrace) {
+            loop {
+                let key = self.expression()?;
+                self.consume(&Token::Colon)?;
+                let value = self.expression()?;
+                pairs.push((key, value));
+
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightBrace)?;
+        Ok(Expr::MapExpr(pairs))
+    }
+
+    fn stack_expression(&mut self) -> Result<Expr> {
+        self.consume(&Token::LeftBracket)?;
+        let mut exprs = Vec::new();
+
+        if !self.check(&Token::RightBracket) {
+            loop {
+                exprs.push(self.expression()?);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightBracket)?;
+        Ok(Expr::StackExpr(exprs))
+    }
+
+    fn queue_expression(&mut self) -> Result<Expr> {
+        self.consume(&Token::LeftBracket)?;
+        let mut exprs = Vec::new();
+
+        if !self.check(&Token::RightBracket) {
+            loop {
+                exprs.push(self.expression()?);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightBracket)?;
+        Ok(Expr::QueueExpr(exprs))
+    }
+
+    fn linkedlist_expression(&mut self) -> Result<Expr> {
+        self.consume(&Token::LeftBracket)?;
+        let mut exprs = Vec::new();
+
+        if !self.check(&Token::RightBracket) {
+            loop {
+                exprs.push(self.expression()?);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&Token::RightBracket)?;
+        Ok(Expr::LinkedListExpr(exprs))
     }
 }

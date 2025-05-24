@@ -1,0 +1,64 @@
+// Correct Carbon Syntax Demonstration
+// This file shows the currently supported syntax
+
+print("=== Variable Declarations ===")
+
+// Typed variables (currently supported)
+int x = 42
+string name = "Carbon"
+int[] numbers = [1, 2, 3, 4, 5]
+bool isReady = true
+
+print("x: " + toString(x))
+print("name: " + name)
+print("numbers: " + toString(numbers))
+print("isReady: " + toString(isReady))
+
+print("=== Loop Demonstrations ===")
+
+// For-in loop (no semicolons needed)
+print("For-in loop:")
+for num in numbers {
+    print("Number: " + toString(num))
+}
+
+// While-like for loop (no semicolons needed)
+print("While-like for loop:")
+int count = 0
+for count < 3 {
+    print("Count: " + toString(count))
+    count = count + 1
+}
+
+// C-style for loop (semicolons required as separators)
+print("C-style for loop:")
+for i = 0; i < numbers.len; i++ {
+    print("Index " + toString(i) + ": " + toString(numbers[i]))
+}
+
+print("=== Basic Expressions ===")
+
+// Simple arithmetic and comparisons
+int result = x * 2
+print("x * 2 = " + toString(result))
+print("x > 40: " + toString(x > 40))
+print("x % 2 == 0: " + toString(x % 2 == 0))
+
+print("=== Standard Library Usage ===")
+
+// Math functions
+print("Math: sqrt(16) = " + toString(sqrt(16)))
+print("Math: pow(2)(3) = " + toString(pow(2)(3)))
+
+// String functions
+string text = "  Hello World  "
+print("Original: '" + text + "'")
+print("Trimmed: '" + trim(text) + "'")
+print("Uppercase: " + toUpperCase(trim(text)))
+
+// Array functions
+int[] moreNumbers = [6, 7, 8]
+int[] combined = concat(numbers)(moreNumbers)
+print("Combined arrays: " + toString(combined))
+
+print("=== Syntax Demo Complete ===")

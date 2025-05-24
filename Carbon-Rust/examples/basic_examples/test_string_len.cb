@@ -1,0 +1,11 @@
+// Test string length functionality
+print("Testing string length:")
+
+let s = "hello"
+print("String: " + s)
+print("Length: " + toString(s.len))
+
+let words = ["apple", "banana"]
+let getLength = s => s.len
+let firstLength = getLength("test")
+print("First length: " + toString(firstLength))

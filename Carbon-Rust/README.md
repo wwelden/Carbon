@@ -24,11 +24,19 @@ bin/carbon
 - **Arithmetic Operations**: `+`, `-`, `*`, `/`, `%`, `**` (exponentiation)
 - **Comparison Operations**: `==`, `!=`, `>`, `<`, `>=`, `<=`
 - **Boolean Operations**: `&&`, `||`, `!`
-- **Variable Declarations**: `let` and `const` (JavaScript style)
+- **Variable Declarations**: Multiple syntax styles for flexible coding
+  - **Type inference (mutable)**: `var x = 42` - automatic type detection with mutability
+  - **Type inference (immutable)**: `let x = 42` - automatic type detection, immutable
+  - **Typed constants**: `let int x = 42` - explicitly typed immutable variables
+  - **Typed variables**: `int x = 42` - explicitly typed mutable variables (original syntax)
 - **If Expressions**: `if condition { then_value } else { else_value }` (Go/Python style - no parentheses!)
 - **Ternary Operator**: `condition ? value1 : value2` (C/JavaScript style)
-- **Arrow Functions**: `x => x + 1` (JavaScript style)
+- **Arrow Functions**: Multiple parameter support for enhanced functional programming
+  - **Single parameter**: `x => x + 1` (JavaScript style)
+  - **Multi-parameter**: `(x, y) => x + y` - supports multiple parameters for complex operations
+  - **Complex expressions**: `(a, b, c) => a * b * c` - works with higher-order functions
 - **For-In Loops**: `for item in array { ... }` (Go style)
+- **While-Style Loops**: `for condition { ... }` (Go-style unified for loops)
 - **Arrays**: `[1, 2, 3]` with `.len` property
 - **Type Checking**: `typeof(value)`
 - **String Conversion**: `toString(value)`
@@ -47,21 +55,98 @@ bin/carbon
   - Error checking: `isErr(value)` returns boolean
   - Tuples for multiple returns: `(result, error)` pattern
   - Explicit error handling: `if (isErr(result)) { ... } else { ... }`
+- **Compound Assignment Operators**: `+=`, `-=`, `*=`, `/=`, `%=` for concise variable updates
+- **Increment/Decrement Operators**: `++` and `--` for convenient counting operations
+- **Function Declarations with Type Annotations**:
+  - Full function syntax: `fn functionName(type param) -> returnType { ... }`
+  - Parameter type annotations: `int`, `string`, `bool`, `float`
+  - Return type annotations with `->` syntax
+  - Multi-parameter functions with typed parameters
+- **Object-Oriented Programming**:
+  - Class declarations: `class ClassName { ... }`
+  - Field declarations within classes
+  - Method declarations with parameters
+  - Object instantiation: `new ClassName()`
+  - Method calls: `object.method(args)`
+  - `this` keyword for accessing object fields and methods
+  - Constructor-like `init` methods
+- **Advanced Data Structures**: Built-in collection types with methods
+  - **ArrayList**: `ArrayList[1, 2, 3]` with `push()`, `pop()`, `get()`, `set()` methods
+  - **Set**: `Set{"item1", "item2"}` with `add()`, `contains()`, `remove()` methods
+  - **Map/Dictionary**: `Map{"key": "value"}` with `put()`, `get()`, `containsKey()` methods
+  - **Stack**: `Stack[1, 2, 3]` with `push()`, `pop()`, `peek()` methods (LIFO)
+  - **Queue**: `Queue["first", "second"]` with `enqueue()`, `dequeue()`, `front()` methods (FIFO)
+  - **LinkedList**: `LinkedList[1, 2, 3]` with `prepend()`, `head()` methods
+  - **Universal Methods**: All collections support `size()`, `isEmpty()` methods
+- **Higher-Order Functions**: Comprehensive functional programming support
+  - **map**: `map(fn)(array)` - Transform each element
+  - **filter**: `filter(predicate)(array)` - Select elements matching condition
+  - **fold/reduce**: `fold(fn)(initial)(array)` - Accumulate values
+  - **forEach**: `forEach(fn)(array)` - Execute function for each element (side effects)
+  - **find**: `find(predicate)(array)` - Find first matching element
+  - **any/some**: `any(predicate)(array)` - Check if any element matches
+  - **all/every**: `all(predicate)(array)` - Check if all elements match
+  - **compose**: `compose(f)(g)` - Function composition `f(g(x))`
+  - **zip**: `zip(array1)(array2)` - Combine arrays into tuples
+  - **flatMap**: `flatMap(fn)(array)` - Map and flatten results
+  - **zipWith**: `zipWith(fn)(array1)(array2)` - Combine with custom function
+  - **concatMap**: Alias for `flatMap`
+- **Math Functions**: Comprehensive mathematical operations
+  - **abs**: `abs(number)` - Absolute value
+  - **floor**: `floor(number)` - Round down to nearest integer
+  - **ceil**: `ceil(number)` - Round up to nearest integer
+  - **round**: `round(number)` - Round to nearest integer
+  - **sqrt**: `sqrt(number)` - Square root
+  - **pow**: `pow(base)(exponent)` - Power function
+  - **sin/cos/tan**: `sin(number)` - Trigonometric functions
+  - **log/log10**: `log(number)` - Natural and base-10 logarithms
+  - **exp**: `exp(number)` - Exponential function
+- **String Functions**: Powerful string manipulation
+  - **length**: `length(string)` - String length
+  - **toUpperCase/toLowerCase**: `toUpperCase(string)` - Case conversion
+  - **trim**: `trim(string)` - Remove whitespace
+  - **split**: `split(string)(delimiter)` - Split string into array
+  - **join**: `join(delimiter)(array)` - Join array into string
+  - **substring**: `substring(string)(start)(end)` - Extract substring
+  - **indexOf**: `indexOf(string)(substring)` - Find substring position
+  - **replace**: `replace(string)(old)(new)` - Replace occurrences
+  - **startsWith/endsWith**: `startsWith(string)(prefix)` - String tests
+- **Array Utilities**: Additional array manipulation functions
+  - **empty**: `empty(array)` - Check if array is empty
+  - **concat**: `concat(array1)(array2)` - Concatenate arrays
+  - **flatten**: `flatten(array)` - Flatten nested arrays
+  - **includes**: `includes(array)(element)` - Check array membership
+  - **slice**: `slice(array)(start)(end)` - Extract array slice
+- **Type Checking**: Runtime type inspection
+  - **isNumber/isString/isBool**: `isNumber(value)` - Type predicates
+  - **isArray/isFunction/isNull/isObject**: Advanced type checking
+- **Random Functions**: Pseudo-random number generation
+  - **random**: `random()` - Random float between 0 and 1
+  - **randomInt**: `randomInt(max)` - Random integer from 0 to max-1
+- **Conversion Functions**: Type conversion utilities
+  - **toInt/toFloat/toBool**: `toInt(value)` - Convert between types
 
 ### 🚧 In Development
 
-- Function declarations with type annotations
-- Object-oriented programming (classes, methods)
-- More loop constructs (while, for-range)
-- Multi-parameter arrow functions
+- Enhanced pattern matching with guards
+- Module system and imports
+- Standard library expansion
+- Performance optimizations
 
 ## Directory Structure
 
 ```
 Carbon/
-├── src/           # Rust source code
-├── examples/      # Carbon code examples
+├── src/           # Rust source code (lexer, parser, evaluator)
+├── examples/      # Carbon code examples and demos
+│   ├── basic_examples/          # Basic language features
+│   ├── stdlib_tests/           # Standard library tests
+│   ├── language_features/      # Advanced language features
+│   ├── data_structures/        # Data structure examples
+│   ├── higher_order_functions/ # Functional programming
+│   └── demos/                  # Feature demonstrations
 ├── docs/          # Documentation
+│   └── SYNTAX_GUIDE.md        # Comprehensive syntax reference
 ├── target/        # Rust build artifacts
 ├── Cargo.toml     # Rust project configuration
 └── README.md      # This file
@@ -113,26 +198,59 @@ cargo run examples/demo.cb
 
 ### Running Examples
 
-Explore the `examples/` directory for comprehensive Carbon code samples:
+Explore the organized `examples/` directory for comprehensive Carbon code samples:
 
 ```bash
-# View available examples
+# View organized examples
 ls examples/
 
+# Basic language features
+cargo run examples/basic_examples/new_syntax_test.cb
+cargo run examples/basic_examples/comprehensive_new_syntax_demo.cb
+cargo run examples/basic_examples/syntax_features_summary.cb
+
+# Standard library tests
+cargo run examples/stdlib_tests/
+
+# Language features
+cargo run examples/language_features/
+
+# Data structures
+cargo run examples/data_structures/
+
+# Functional programming
+cargo run examples/higher_order_functions/
+
+# Feature demonstrations
+cargo run examples/demos/
+
 # Key examples:
-# - pattern_matching.cb    # Comprehensive pattern matching demo
-# - pattern_demo.cb        # Interactive pattern examples
-# - demo.cb               # General language features
-# - test_working_features.cb # All working features
+# - basic_examples/new_syntax_test.cb           # New syntax features demo
+# - basic_examples/comprehensive_new_syntax_demo.cb  # Complete new syntax showcase
+# - stdlib_tests/                              # Standard library comprehensive tests
+# - higher_order_functions/                    # Functional programming examples
+# - data_structures/                           # Advanced data structures
+# - language_features/                         # Pattern matching, OOP, etc.
+# - demos/                                     # Feature demonstrations
 ```
 
 ### Example Code
 
 ```carbon
-// Variables and basic operations
-let x = 42;           // Type inferred
-int y = 10;           // Explicit type
+// Variable declarations (multiple syntaxes)
+var x = 42;           // Type inferred, mutable
+let y = 10;           // Type inferred, immutable
+let int z = 5;        // Explicitly typed constant
+int w = 15;           // Explicitly typed variable
 string message = "Hello Carbon";
+
+// Multi-parameter lambda functions
+let add = (x, y) => x + y;
+let multiply = (a, b, c) => a * b * c;
+
+// Works with higher-order functions
+let numbers = [1, 2, 3, 4, 5];
+let sum = fold((acc, x) => acc + x)(0)(numbers);
 
 // Array types
 int[] numbers = [1, 2, 3, 4, 5];
@@ -170,6 +288,115 @@ double(21);     // 42
 for num in numbers {
     print(num);
 }
+
+// While-style loops (Go syntax)
+let counter = 5;
+for counter > 0 {
+    print(counter);
+    counter--;
+}
+
+// Function declarations with type annotations
+fn factorial(int n) -> int {
+    let result = 1;
+    let i = 1;
+    for i <= n {
+        result *= i;
+        i++;
+    }
+    return result;
+}
+
+// Object-oriented programming
+class Calculator {
+    value;
+
+    init(int initialValue) {
+        this.value = initialValue;
+        return this;
+    }
+
+    add(int x) {
+        this.value += x;
+        return this;
+    }
+
+    getValue() {
+        return this.value;
+    }
+}
+
+let calc = new Calculator();
+calc.init(10).add(5);
+print(calc.getValue());  // 15
+
+// Advanced data structures
+let list = ArrayList[1, 2, 3];
+list.push(4);
+print(list.size());  // 4
+
+let fruits = Set{"apple", "banana", "cherry"};
+fruits.add("orange");
+print(fruits.contains("apple"));  // true
+
+let person = Map{"name": "Alice", "age": 30};
+person.put("city", "New York");
+print(person.get("name"));  // "Alice"
+
+let stack = Stack[1, 2, 3];
+stack.push(4);
+print(stack.pop());  // 4
+
+// Higher-order functions
+let evens = filter(x => x % 2 == 0)(numbers);
+let doubled = map(x => x * 2)(evens);
+let sum = fold((x, y) => x + y)(0)(doubled);
+
+print(evens);    // [2, 4]
+print(doubled);  // [4, 8]
+print(sum);      // 12
+
+// Function composition
+let addOne = x => x + 1;
+let multiplyByTwo = x => x * 2;
+let composed = compose(multiplyByTwo)(addOne);
+print(composed(5));  // 12 (5 + 1) * 2
+
+// Math functions
+print(abs(-5));        // 5
+print(sqrt(16));       // 4
+print(pow(2)(8));      // 256
+print(sin(PI / 2));    // 1
+print(log(E));         // 1
+
+// String functions
+let text = "  Hello World  ";
+print(trim(text));                    // "Hello World"
+print(toUpperCase(text));             // "  HELLO WORLD  "
+let words = split("a,b,c")(",");      // ["a", "b", "c"]
+print(join("-")(words));              // "a-b-c"
+print(substring("Hello")(1)(4));      // "ell"
+print(indexOf("Hello")("ll"));        // 2
+print(replace("Hello")("l")("x"));    // "Hexxo"
+
+// Array utilities
+let arr1 = [1, 2, 3];
+let arr2 = [4, 5, 6];
+print(concat(arr1)(arr2));            // [1, 2, 3, 4, 5, 6]
+print(flatten([[1, 2], [3, 4]]));     // [1, 2, 3, 4]
+print(includes(arr1)(2));             // true
+print(slice(arr1)(0)(2));             // [1, 2]
+
+// Type checking
+print(isNumber(42));                  // true
+print(isString("hello"));             // true
+print(isArray([1, 2, 3]));           // true
+
+// Random and conversion
+print(random());                      // random float 0-1
+print(randomInt(100)(0));             // random int 0-99
+print(toInt("42"));                   // 42
+print(toBool(""));                    // false
 
 // Type checking
 typeof(x);      // "number"
@@ -243,16 +470,26 @@ Carbon is implemented in Rust using:
 
 **Key Features**: Memory-safe implementation, fast compilation, zero parser conflicts, comprehensive pattern matching support.
 
+## Documentation
+
+For detailed syntax reference and language features, see:
+- **[Syntax Guide](docs/SYNTAX_GUIDE.md)** - Comprehensive language syntax reference
+- **[Examples](examples/)** - Organized code examples by category
+- **[Basic Examples](examples/basic_examples/)** - New syntax features and basic usage
+- **[Standard Library Tests](examples/stdlib_tests/)** - Complete stdlib functionality tests
+
 ## Contributing
 
 The Carbon language is actively being developed. Current priorities:
 
-1. **Enhanced Arrow Functions**: Support for complex arrow function syntax with blocks
-2. **Multi-Parameter Functions**: Support for `(x, y) => x + y` syntax
-3. **Function Declarations**: Type annotations and complex signatures
-4. **Object-Oriented Features**: Classes, inheritance, methods
-5. **Enhanced Pattern Matching**: Add guards, nested patterns, or expressions
-6. **Standard Library**: Built-in functions and utilities
+1. **Enhanced Pattern Matching**: Pattern guards, nested patterns, and complex expressions
+2. **Module System**: Import/export functionality for code organization
+3. **Standard Library Expansion**: More built-in functions and utilities
+4. **Performance Optimizations**: Bytecode compilation and runtime improvements
+5. **~~Multi-Parameter Arrow Functions~~**: ✅ **COMPLETED** - Support for `(x, y) => x + y` syntax
+6. **Generic Types**: Type parameters for functions and data structures
+7. **Advanced Error Handling**: Result types and advanced error propagation
+8. **Concurrency Features**: Async/await and parallel processing
 
 ### Development Workflow
 
@@ -270,10 +507,24 @@ cargo build --release
 
 ## Recent Accomplishments
 
+- ✅ **NEW: Enhanced Variable Declarations**: Added support for `var` (mutable type inference), `let` (immutable type inference), and `let type` (typed constants)
+- ✅ **NEW: Multi-Parameter Lambda Functions**: Full support for `(x, y) => x + y` syntax with seamless higher-order function integration
+- ✅ **NEW: Comprehensive Documentation**: Organized examples directory and detailed syntax guide in `docs/SYNTAX_GUIDE.md`
 - ✅ **Complete Rust Conversion**: Successfully converted from Haskell to Rust implementation
 - ✅ **Memory Safety**: All Carbon code now runs with Rust's memory safety guarantees
 - ✅ **Zero Parser Conflicts**: Hand-written recursive descent parser with no ambiguities
 - ✅ **Fast Compilation**: Rust builds much faster than the original Haskell implementation
+- ✅ **Object-Oriented Programming**: Full class system with fields, methods, and inheritance
+- ✅ **Function Declarations**: Type-annotated functions with `fn name(type param) -> returnType` syntax
+- ✅ **Advanced Data Structures**: ArrayList, Set, Map, Stack, Queue, LinkedList with comprehensive methods
+- ✅ **Higher-Order Functions**: Complete functional programming suite (map, filter, fold, compose, etc.)
+- ✅ **Enhanced Loop Constructs**: Go-style unified `for` syntax for both iteration and while-loops
+- ✅ **Comprehensive Math Library**: Trigonometric, logarithmic, and power functions (abs, sqrt, sin, cos, tan, log, exp, pow)
+- ✅ **Advanced String Processing**: String manipulation with split, join, substring, replace, case conversion
+- ✅ **Array Utilities**: Additional array operations (concat, flatten, slice, includes, indexOf)
+- ✅ **Type Checking System**: Runtime type inspection (isNumber, isString, isArray, etc.)
+- ✅ **Random Number Generation**: Pseudo-random functions for numbers and integers
+- ✅ **Type Conversion Functions**: Robust conversion between types (toInt, toFloat, toBool)
 - ✅ **Compound Assignment Operators**: `+=`, `-=`, `*=`, `/=`, `%=` for concise variable updates
 - ✅ **Increment/Decrement Operators**: `++` and `--` for convenient counting operations
 - ✅ **Go-Style Error Handling**: Explicit error values with `err()` and `isErr()` functions
@@ -283,6 +534,7 @@ cargo build --release
 - ✅ **For-In Loops**: Go-style `for item in array { ... }`
 - ✅ **Logical Operators**: Fixed `||` and `&&` tokenization and evaluation
 - ✅ **Mathematical Constants**: `PI`, `E`, `PHI`, `AVOGADRO` support
+- ✅ **Method Chaining**: Support for fluent interfaces and chained method calls
 - ✅ **REPL Support**: Interactive development environment with history
 - ✅ **Comprehensive Examples**: Working demonstration files showcasing all features
 

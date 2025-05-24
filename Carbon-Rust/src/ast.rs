@@ -10,7 +10,9 @@ pub enum Statement {
     ExprStmt(Expr),
     LetStmt(Var, Expr),
     ConstStmt(Var, Expr),
+    VarStmt(Var, Expr),
     TypedVarStmt(Type, Var, Expr),
+    TypedLetStmt(Type, Var, Expr),
     FnDeclStmt(Var, Vec<(Type, Var)>, Option<Type>, Vec<Statement>, Expr),
     ClassStmt(ClassName, Vec<ClassMember>),
     ForInStmt(Var, Expr, Vec<Statement>),
@@ -27,6 +29,13 @@ pub enum Type {
     BoolType,
     StringType,
     ArrayType(Box<Type>),
+    ArrayListType(Box<Type>),    // Dynamic array
+    TupleType(Vec<Type>),        // Typed tuple
+    SetType(Box<Type>),          // Set data structure
+    MapType(Box<Type>, Box<Type>), // Map/Dictionary with key-value types
+    StackType(Box<Type>),        // Stack data structure
+    QueueType(Box<Type>),        // Queue data structure
+    LinkedListType(Box<Type>),   // Linked list
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -71,6 +80,13 @@ pub enum Expr {
     TupleExpr(Vec<Expr>),
     IsErrorExpr(Box<Expr>),
     ThisExpr,
+    ArrayListExpr(Vec<Expr>),                    // ArrayList creation
+    SetExpr(Vec<Expr>),                          // Set creation
+    MapExpr(Vec<(Expr, Expr)>),                  // Map creation with key-value pairs
+    StackExpr(Vec<Expr>),                        // Stack creation
+    QueueExpr(Vec<Expr>),                        // Queue creation
+    LinkedListExpr(Vec<Expr>),                   // LinkedList creation
+    DataStructureMethodCall(Box<Expr>, String, Vec<Expr>), // For built-in methods like push, pop, etc.
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -164,6 +180,22 @@ impl fmt::Display for Type {
             Type::BoolType => write!(f, "bool"),
             Type::StringType => write!(f, "string"),
             Type::ArrayType(inner) => write!(f, "{}[]", inner),
+            Type::ArrayListType(inner) => write!(f, "ArrayList<{}>", inner),
+            Type::TupleType(types) => {
+                write!(f, "(")?;
+                for (i, t) in types.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{}", t)?;
+                }
+                write!(f, ")")
+            }
+            Type::SetType(inner) => write!(f, "Set<{}>", inner),
+            Type::MapType(key, value) => write!(f, "Map<{}, {}>", key, value),
+            Type::StackType(inner) => write!(f, "Stack<{}>", inner),
+            Type::QueueType(inner) => write!(f, "Queue<{}>", inner),
+            Type::LinkedListType(inner) => write!(f, "LinkedList<{}>", inner),
         }
     }
 }

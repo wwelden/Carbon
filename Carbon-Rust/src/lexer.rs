@@ -1,4 +1,3 @@
-
 use crate::error::{CarbonError, Result};
 use std::fmt;
 
@@ -59,6 +58,7 @@ pub enum Token {
     // Keywords
     Let,
     Const,
+    Var,
     If,
     Else,
     For,
@@ -84,6 +84,12 @@ pub enum Token {
     IntType,
     BoolType,
     StringType,
+    ArrayListType,
+    SetType,
+    MapType,
+    StackType,
+    QueueType,
+    LinkedListType,
 
     // Punctuation
     LeftParen,
@@ -372,6 +378,7 @@ impl Lexer {
             // Keywords
             "let" => Token::Let,
             "const" => Token::Const,
+            "var" => Token::Var,
             "if" => Token::If,
             "else" => Token::Else,
             "for" => Token::For,
@@ -396,6 +403,12 @@ impl Lexer {
             "int" => Token::IntType,
             "bool" => Token::BoolType,
             "string" => Token::StringType,
+            "ArrayList" => Token::ArrayListType,
+            "Set" => Token::SetType,
+            "Map" => Token::MapType,
+            "Stack" => Token::StackType,
+            "Queue" => Token::QueueType,
+            "LinkedList" => Token::LinkedListType,
 
             // Literals
             "true" => Token::Bool(true),
