@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone)]
+#[derive(Error, Debug, Clone, PartialEq)]
 pub enum CarbonError {
     #[error("Lexer error: {message} at line {line}, column {column}")]
     LexerError {

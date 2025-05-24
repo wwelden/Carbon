@@ -497,6 +497,7 @@ impl Value {
             Value::Map(map) => Ok(map.len() as i64),
             Value::Stack(stack) => Ok(stack.len() as i64),
             Value::Queue(queue) => Ok(queue.len() as i64),
+            Value::Tuple(tuple) => Ok(tuple.len() as i64),
             Value::LinkedList(list) => {
                 let mut count = 0;
                 let mut current = list.as_ref();
@@ -520,6 +521,7 @@ impl Value {
             Value::Map(map) => Ok(map.is_empty()),
             Value::Stack(stack) => Ok(stack.is_empty()),
             Value::Queue(queue) => Ok(queue.is_empty()),
+            Value::Tuple(tuple) => Ok(tuple.is_empty()),
             Value::LinkedList(list) => Ok(list.is_none()),
             Value::String(s) => Ok(s.is_empty()),
             _ => Err(CarbonError::type_error("isEmpty() not supported for this type")),
