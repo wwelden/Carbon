@@ -227,14 +227,14 @@ Both implementations include the same set of example files in their `examples/` 
 - IDE integration
 - WebAssembly compilation target
 
-## Contributing
-
-1. Choose your preferred implementation (Haskell or Rust)
-2. Fork the repository
-3. Create a feature branch
-4. Make your changes
-5. Add tests and examples
-6. Submit a pull request
+<!-- ## Contributing -->
+<!---->
+<!-- 1. Choose your preferred implementation (Haskell or Rust) -->
+<!-- 2. Fork the repository -->
+<!-- 3. Create a feature branch -->
+<!-- 4. Make your changes -->
+<!-- 5. Add tests and examples -->
+<!-- 6. Submit a pull request -->
 
 ## Language Philosophy
 
@@ -245,6 +245,3 @@ Carbon aims to be:
 - **Practical**: Real-world applicability with good performance
 - **Modern**: Contemporary language design principles
 
-## License
-
-This project is dual-licensed under MIT or Apache-2.0.
