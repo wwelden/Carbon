@@ -1,4 +1,0 @@
-let x = 42
-x + 10
-true && false
-if (true) { 100 } else { 200 }

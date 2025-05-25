@@ -1,9 +1,0 @@
-// Simple class test to verify basic functionality
-
-class Test {
-    value
-}
-
-let test = new Test()
-print("Created test object")
-print("Type of test: " + typeof(test))

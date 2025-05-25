@@ -1,3 +1,0 @@
-print("Hello from Carbon!")
-let x = 42
-print(x)

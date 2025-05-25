@@ -1,27 +1,27 @@
-# Carbon Programming Language
+# Carbon & Oxide & Oxide Programming Language
 
 Carbon is a modern programming language that amalgamates syntax from Go, JavaScript, Rust, Haskell, C#, Java, and C. It features clean, expressive syntax with powerful functional programming capabilities including Haskell-inspired pattern matching and Go-style error handling.
 
 This repository contains **two implementations** of the Carbon language:
-- **Carbon(Haskell)** - The original implementation written in Haskell
-- **Rusty Carbon(Rust)** - A modern reimplementation written in Rust
+- **Carbon** - The original implementation written in Haskell
+- **Oxide (Rust)** - A modern reimplementation written in Rust
 
 ## 📖 Project Origins
 
-This started as a fork of British, an impractical programming language made for my programming languages course. Carbon was made with the goal of making British a language I would actually want to use by adding some of my favorite syntax elements from other languages such as Haskell, Rust, Go, Java, C#, C, Javascript, and some new ideas. Rusty Carbon is a refactor of Carbon in Rust with additional features. The goal of rust carbon will be an efficient versatile language that will be fun to work with. At this current point I am not sure how far I want to go with this, but for now it is a fun summer project.
+This started as a fork of British, an impractical programming language made for my programming languages course. Carbon was made with the goal of making British a language I would actually want to use by adding some of my favorite syntax elements from other languages such as Haskell, Rust, Go, Java, C#, C, Javascript, and some new ideas. Oxide is a refactor of Carbon in Rust with additional features. The goal of Oxide will be an efficient versatile language that will be fun to work with. At this current point I am not sure how far I want to go with this, but for now it is a fun summer project.
 
 ## 🚀 Quick Start
 
-### Carbon(Haskell)
+### Carbon
 ```bash
-cd Carbon-Haskell
+cd Carbon
 make
 bin/carbon
 ```
 
-### Rusty Carbon(Rust)
+### Oxide (Rust)
 ```bash
-cd Carbon-Rust
+cd Oxide
 cargo build
 cargo run
 ```
@@ -179,8 +179,8 @@ if isErr(result) {
 
 ## Implementation Status
 
-### Carbon(Haskell) - Status: ✅ Mostly Working
-Located in `Carbon-Haskell/`
+### Carbon - Status: ✅ Mostly Working
+Located in `Carbon/`
 
 **Working Features:**
 - ✅ For-in loops: `for item in collection { }`
@@ -192,8 +192,8 @@ Located in `Carbon-Haskell/`
 **In Progress:**
 - ⚠️ While-style for loops: `for condition { }` (parser conflicts being resolved)
 
-### Rusty Carbon(Rust) - Status: ✅ Fully Working
-Located in `Carbon-Rust/`
+### Oxide (Rust) - Status: ✅ Fully Working
+Located in `Oxide/`
 
 **Working Features:**
 - ✅ Both for-in and while-style for loops
@@ -208,8 +208,8 @@ Located in `Carbon-Rust/`
 
 ## Implementation Comparison
 
-| Feature | Carbon(Haskell) | Rusty Carbon(Rust) |
-|---------|----------------|-------------------|
+| Feature | Carbon | Oxide |
+|---------|--------|-------|
 | **For-in loops** | ✅ Working | ✅ Working |
 | **While-style for loops** | ⚠️ In progress | ✅ Working |
 | **Function return types** | ✅ Working | ✅ Working |
@@ -220,7 +220,7 @@ Located in `Carbon-Rust/`
 | **Build Speed** | Slower (GHC compilation) | Faster (incremental compilation) |
 | **Error Messages** | Basic | Colored and detailed |
 
-### Carbon(Haskell) - Original Implementation
+### Carbon - Original Implementation
 
 **Architecture:**
 - `Lexer.x` - Alex-based lexical analyzer
@@ -236,14 +236,14 @@ Located in `Carbon-Rust/`
 
 **Building:**
 ```bash
-cd Carbon-Haskell
+cd Carbon
 make            # Build interpreter
 make clean      # Clean build artifacts
 make install    # Build and install to bin/
 bin/carbon examples/for_loops.cb  # Test enhanced loops
 ```
 
-### Rusty Carbon(Rust) - Modern Reimplementation
+### Oxide (Rust) - Modern Reimplementation
 
 **Architecture:**
 - `lexer.rs` - Hand-written lexer with enhanced token support
@@ -262,7 +262,7 @@ bin/carbon examples/for_loops.cb  # Test enhanced loops
 
 **Building:**
 ```bash
-cd Carbon-Rust
+cd Oxide
 cargo build --release  # Optimized build
 cargo run           # Run REPL
 cargo run examples/for_loops.cb      # Test both loop types
@@ -294,20 +294,20 @@ Both implementations provide an enhanced interactive REPL:
 
 ```bash
 # Haskell version
-cd Carbon-Haskell && bin/carbon
+cd Carbon && bin/carbon
 
 # Rust version
-cd Carbon-Rust && cargo run
+cd Oxide && cargo run
 ```
 
 ### Running Carbon Files
 
 ```bash
 # Haskell version
-cd Carbon-Haskell && bin/carbon examples/enhanced_classes.cb
+cd Carbon && bin/carbon examples/enhanced_classes.cb
 
 # Rust version
-cd Carbon-Rust && cargo run examples/advanced_patterns.cb
+cd Oxide && cargo run examples/advanced_patterns.cb
 ```
 
 ## Development Status
