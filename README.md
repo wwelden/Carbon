@@ -4,7 +4,7 @@ Carbon is a modern programming language that amalgamates syntax from Go, JavaScr
 
 This repository contains **two implementations** of the Carbon language:
 - **Carbon** - The original implementation written in Haskell
-- **Oxide (Rust)** - A modern reimplementation written in Rust
+- **Carbon-Oxide (Rust)** - A modern reimplementation written in Rust
 
 ## 📖 Project Origins
 
@@ -193,7 +193,7 @@ Located in `Carbon/`
 - ⚠️ While-style for loops: `for condition { }` (parser conflicts being resolved)
 
 ### Oxide (Rust) - Status: ✅ Fully Working
-Located in `Oxide/`
+Located in `Carbon-Oxide/`
 
 **Working Features:**
 - ✅ Both for-in and while-style for loops
@@ -208,7 +208,7 @@ Located in `Oxide/`
 
 ## Implementation Comparison
 
-| Feature | Carbon | Oxide |
+| Feature | Carbon | Carbon-Oxide |
 |---------|--------|-------|
 | **For-in loops** | ✅ Working | ✅ Working |
 | **While-style for loops** | ⚠️ In progress | ✅ Working |
@@ -262,7 +262,7 @@ bin/carbon examples/for_loops.cb  # Test enhanced loops
 
 **Building:**
 ```bash
-cd Oxide
+cd Carbon-Oxide
 cargo build --release  # Optimized build
 cargo run           # Run REPL
 cargo run examples/for_loops.cb      # Test both loop types
@@ -297,7 +297,7 @@ Both implementations provide an enhanced interactive REPL:
 cd Carbon && bin/carbon
 
 # Rust version
-cd Oxide && cargo run
+cd Carbon-Oxide && cargo run
 ```
 
 ### Running Carbon Files
@@ -307,7 +307,7 @@ cd Oxide && cargo run
 cd Carbon && bin/carbon examples/enhanced_classes.cb
 
 # Rust version
-cd Oxide && cargo run examples/advanced_patterns.cb
+cd Carbon-Oxide && cargo run examples/advanced_patterns.cb
 ```
 
 ## Development Status
