@@ -1,4 +1,4 @@
-# Carbon & Oxide & Oxide Programming Language
+# Carbon & Oxide Programming Language
 
 Carbon is a modern programming language that amalgamates syntax from Go, JavaScript, Rust, Haskell, C#, Java, and C. It features clean, expressive syntax with powerful functional programming capabilities including Haskell-inspired pattern matching and Go-style error handling.
 
