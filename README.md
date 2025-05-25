@@ -21,7 +21,7 @@ bin/carbon
 
 ### Oxide (Rust)
 ```bash
-cd Oxide
+cd Carbon-Oxide
 cargo build
 cargo run
 ```
