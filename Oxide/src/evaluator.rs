@@ -186,7 +186,15 @@ impl Evaluator {
                             context.env.insert(var.clone(), value);
                             for stmt in &statements {
                                 if let Some(val) = self.eval_statement(context, stmt.clone())? {
-                                    last_value = val;
+                                    // Handle Print values immediately
+                                    match &val {
+                                        Value::Print(output) => {
+                                            println!("{}", output);
+                                        }
+                                        _ => {
+                                            last_value = val;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -206,7 +214,15 @@ impl Evaluator {
                     }
                     for stmt in &statements {
                         if let Some(val) = self.eval_statement(context, stmt.clone())? {
-                            last_value = val;
+                            // Handle Print values immediately
+                            match &val {
+                                Value::Print(output) => {
+                                    println!("{}", output);
+                                }
+                                _ => {
+                                    last_value = val;
+                                }
+                            }
                         }
                     }
                 }
@@ -218,7 +234,15 @@ impl Evaluator {
                     // Execute the body first (at least once)
                     for stmt in &statements {
                         if let Some(val) = self.eval_statement(context, stmt.clone())? {
-                            last_value = val;
+                            // Handle Print values immediately
+                            match &val {
+                                Value::Print(output) => {
+                                    println!("{}", output);
+                                }
+                                _ => {
+                                    last_value = val;
+                                }
+                            }
                         }
                     }
                     // Then check the condition

@@ -154,7 +154,6 @@ bin/oxide
 - Module system and imports
 - Performance optimizations
 - Do while loops
-- Return multiple values
 - Advanced generics with constraints
 - True pointer modification (reference semantics)
 

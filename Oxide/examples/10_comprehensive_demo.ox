@@ -1,0 +1,356 @@
+// Oxide Comprehensive Demo
+// A complete showcase of all major Oxide language features
+
+print("=== OXIDE PROGRAMMING LANGUAGE DEMO ===");
+print("Showcasing all major features in one comprehensive example\n");
+
+// ============================================================================
+// BASIC TYPES AND VARIABLES
+// ============================================================================
+
+print("1. BASIC TYPES AND VARIABLES");
+print("----------------------------");
+
+let name = "Oxide";
+let version = 2.0;
+let isStable = true;
+var userCount = 1000;
+
+print("Language: " + name + " v" + toString(version));
+print("Stable: " + toString(isStable) + ", Users: " + toString(userCount));
+
+// ============================================================================
+// FUNCTIONS AND MULTIPLE RETURN VALUES
+// ============================================================================
+
+print("\n2. FUNCTIONS AND MULTIPLE RETURN VALUES");
+print("---------------------------------------");
+
+// Regular function
+fn calculateArea(int width, int height) int {
+    return width * height;
+}
+
+// Multiple return values (Go-style)
+fn divideWithRemainder(int dividend, int divisor) (int, int, bool) {
+    if (divisor == 0) {
+        return 0, 0, false;
+    }
+    return dividend / divisor, dividend % divisor, true;
+}
+
+let area = calculateArea(10, 5);
+print("Area of 10x5 rectangle: " + toString(area));
+
+let quotient, remainder, success := divideWithRemainder(17, 5);
+if (success) {
+    print("17 ÷ 5 = " + toString(quotient) + " remainder " + toString(remainder));
+}
+
+// ============================================================================
+// DATA STRUCTURES AND SUM FUNCTION
+// ============================================================================
+
+print("\n3. DATA STRUCTURES AND SUM FUNCTION");
+print("-----------------------------------");
+
+let numbers = [1, 2, 3, 4, 5];
+let arrayList = ArrayList[10, 20, 30];
+let numberSet = Set[5, 10, 15, 10];  // Duplicates removed
+let stack = Stack[100, 200, 300];
+let queue = Queue[7, 14, 21];
+
+print("Array sum: " + toString(sum(numbers)));
+print("ArrayList sum: " + toString(sum(arrayList)));
+print("Set sum: " + toString(sum(numberSet)));
+print("Stack sum: " + toString(sum(stack)));
+print("Queue sum: " + toString(sum(queue)));
+
+// ============================================================================
+// OBJECT-ORIENTED PROGRAMMING
+// ============================================================================
+
+print("\n4. OBJECT-ORIENTED PROGRAMMING");
+print("------------------------------");
+
+class Vehicle {
+    brand
+    year
+
+    fn start() {
+        print(brand + " vehicle starting...");
+    }
+}
+
+class Car extends Vehicle {
+    doors
+
+    fn drive() {
+        print("Driving the " + toString(year) + " " + brand);
+    }
+}
+
+let car = new Car();
+car.setBrand("Tesla");
+car.setYear(2023);
+car.setDoors(4);
+
+print("Car: " + toString(car.getYear()) + " " + car.getBrand() + " (" + toString(car.getDoors()) + " doors)");
+car.start();
+car.drive();
+
+// ============================================================================
+// PATTERN MATCHING AND TUPLES
+// ============================================================================
+
+print("\n5. PATTERN MATCHING AND TUPLES");
+print("------------------------------");
+
+fn analyzePoint(tuple point) string {
+    return match point {
+        (0, 0) => "Origin",
+        (x, 0) => "On X-axis at " + toString(x),
+        (0, y) => "On Y-axis at " + toString(y),
+        (x, y) if x == y => "Diagonal at " + toString(x),
+        (x, y) if x > 0 && y > 0 => "First quadrant",
+        _ => "Other location"
+    };
+}
+
+let points = [(0, 0), (5, 0), (0, 3), (4, 4), (2, 7)];
+for point in points {
+    let x, y := point;
+    print("Point (" + toString(x) + ", " + toString(y) + "): " + analyzePoint(point));
+}
+
+// ============================================================================
+// BITWISE OPERATIONS AND NUMBER CONVERSIONS
+// ============================================================================
+
+print("\n6. BITWISE OPERATIONS AND NUMBER CONVERSIONS");
+print("--------------------------------------------");
+
+let a = 12;  // 1100 in binary
+let b = 10;  // 1010 in binary
+
+print("a = " + toString(a) + " (binary: " + toBinary(a) + ")");
+print("b = " + toString(b) + " (binary: " + toBinary(b) + ")");
+print("a & b = " + toString(a & b) + " (AND)");
+print("a | b = " + toString(a | b) + " (OR)");
+print("a ^ b = " + toString(a ^ b) + " (XOR)");
+print("a << 1 = " + toString(a << 1) + " (Left shift)");
+
+let hexValue = 255;
+print("Decimal " + toString(hexValue) + " = Hex " + toHex(hexValue) + " = Binary " + toBinary(hexValue));
+
+// ============================================================================
+// HIGHER-ORDER FUNCTIONS
+// ============================================================================
+
+print("\n7. HIGHER-ORDER FUNCTIONS");
+print("-------------------------");
+
+fn square(int x) int { return x * x; }
+fn isEven(int x) bool { return x % 2 == 0; }
+fn add(int acc, int x) int { return acc + x; }
+
+let data = [1, 2, 3, 4, 5, 6];
+let squared = map(data, square);
+let evens = filter(data, isEven);
+let total = fold(data, 0, add);
+
+print("Original: " + toString(data));
+print("Squared: " + toString(squared));
+print("Evens: " + toString(evens));
+print("Sum: " + toString(total));
+
+// ============================================================================
+// POINTERS AND MEMORY MANAGEMENT
+// ============================================================================
+
+print("\n8. POINTERS AND MEMORY MANAGEMENT");
+print("---------------------------------");
+
+let value = 42;
+let ptr = &value;
+
+print("Original value: " + toString(value));
+print("Pointer value: " + toString(*ptr));
+
+*ptr = 100;
+print("After modifying through pointer: " + toString(value));
+
+// Safe pointer operations
+fn safeIncrement(int* p) bool {
+    if (p != null) {
+        *p = *p + 1;
+        return true;
+    }
+    return false;
+}
+
+let result = safeIncrement(&value);
+print("Safe increment result: " + toString(result) + ", new value: " + toString(value));
+
+// ============================================================================
+// ADVANCED CONTROL FLOW
+// ============================================================================
+
+print("\n9. ADVANCED CONTROL FLOW");
+print("------------------------");
+
+// Do-while loop
+print("Do-while countdown:");
+var countdown = 3;
+do {
+    print("  " + toString(countdown));
+    countdown -= 1;
+} while (countdown > 0);
+
+// Complex if expressions
+fn categorize(int n) string {
+    return if (n < 0) {
+        "Negative"
+    } else if (n == 0) {
+        "Zero"
+    } else if (n <= 10) {
+        "Small positive"
+    } else {
+        "Large positive"
+    };
+}
+
+for num in [-5, 0, 5, 15] {
+    print(toString(num) + " is " + categorize(num));
+}
+
+// ============================================================================
+// ERROR HANDLING WITH MULTIPLE RETURNS
+// ============================================================================
+
+print("\n10. ERROR HANDLING WITH MULTIPLE RETURNS");
+print("----------------------------------------");
+
+fn safeDivide(int a, int b) (int, bool, string) {
+    if (b == 0) {
+        return 0, false, "Division by zero";
+    }
+    return a / b, true, "Success";
+}
+
+let testCases = [(10, 2), (15, 3), (8, 0)];
+for testCase in testCases {
+    let dividend, divisor := testCase;
+    let result, success, message := safeDivide(dividend, divisor);
+
+    if (success) {
+        print(toString(dividend) + " ÷ " + toString(divisor) + " = " + toString(result));
+    } else {
+        print(toString(dividend) + " ÷ " + toString(divisor) + " failed: " + message);
+    }
+}
+
+// ============================================================================
+// MATHEMATICAL CONSTANTS AND RECURSION
+// ============================================================================
+
+print("\n11. MATHEMATICAL CONSTANTS AND RECURSION");
+print("----------------------------------------");
+
+print("Mathematical constants:");
+print("PI = " + toString(PI));
+print("E = " + toString(E));
+print("PHI = " + toString(PHI));
+
+fn factorial(int n) int {
+    return if (n <= 1) { 1 } else { n * factorial(n - 1) };
+}
+
+print("Factorials:");
+for i in [1, 2, 3, 4, 5] {
+    print(toString(i) + "! = " + toString(factorial(i)));
+}
+
+// ============================================================================
+// COMPREHENSIVE EXAMPLE: STUDENT MANAGEMENT SYSTEM
+// ============================================================================
+
+print("\n12. COMPREHENSIVE EXAMPLE: STUDENT MANAGEMENT SYSTEM");
+print("----------------------------------------------------");
+
+class Student {
+    name
+    id
+    grades
+
+    fn addGrade(int grade) {
+        if (grades == null) {
+            grades = ArrayList[];
+        }
+        grades.add(grade);
+    }
+
+    fn getAverage() int {
+        if (grades == null || grades.len == 0) {
+            return 0;
+        }
+        return sum(grades) / grades.len;
+    }
+
+    fn getLetterGrade() string {
+        let avg = getAverage();
+        return if (avg >= 90) { "A" }
+               else if (avg >= 80) { "B" }
+               else if (avg >= 70) { "C" }
+               else if (avg >= 60) { "D" }
+               else { "F" };
+    }
+}
+
+// Create students
+let alice = new Student();
+alice.setName("Alice Johnson");
+alice.setId(1001);
+alice.addGrade(95);
+alice.addGrade(87);
+alice.addGrade(92);
+
+let bob = new Student();
+bob.setName("Bob Smith");
+bob.setId(1002);
+bob.addGrade(78);
+bob.addGrade(82);
+bob.addGrade(75);
+
+let students = [alice, bob];
+
+print("Student Report:");
+for student in students {
+    let avg = student.getAverage();
+    let grade = student.getLetterGrade();
+    print(student.getName() + " (ID: " + toString(student.getId()) + ")");
+    print("  Average: " + toString(avg) + "% (Grade: " + grade + ")");
+}
+
+// ============================================================================
+// SUMMARY
+// ============================================================================
+
+print("\n=== OXIDE LANGUAGE FEATURES SUMMARY ===");
+print("✓ Variables and basic types (int, string, bool, real)");
+print("✓ Functions with single and multiple return values");
+print("✓ Data structures (Array, ArrayList, Set, Map, Stack, Queue)");
+print("✓ Sum function working on all data structures");
+print("✓ Object-oriented programming with inheritance");
+print("✓ Automatic getter/setter generation");
+print("✓ Pattern matching with guards and tuples");
+print("✓ Bitwise operations and number base conversions");
+print("✓ Higher-order functions (map, filter, fold)");
+print("✓ Pointers and memory management");
+print("✓ Advanced control flow (do-while, complex if expressions)");
+print("✓ Error handling with multiple return values");
+print("✓ Mathematical constants and recursive functions");
+print("✓ Comprehensive type system and safety features");
+
+print("\nOxide: A modern, safe, and expressive programming language!");
+print("Ready for real-world applications and system programming.");

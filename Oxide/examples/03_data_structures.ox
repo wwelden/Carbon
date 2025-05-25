@@ -1,0 +1,112 @@
+// Oxide Data Structures
+// Arrays, ArrayList, Set, Map, Stack, Queue, and sum function
+
+print("=== Arrays ===");
+
+let numbers = [1, 2, 3, 4, 5];
+print("Array: [1, 2, 3, 4, 5]");
+print("First element: " + toString(numbers[0]));
+print("Length: " + toString(numbers.len));
+print("Sum: " + toString(sum(numbers)));
+
+// Array with different types
+let mixed = [10, 20, 30];
+print("Mixed array sum: " + toString(sum(mixed)));
+
+print("\n=== ArrayList ===");
+
+let arrayList = ArrayList[10, 20, 30, 40];
+print("ArrayList: [10, 20, 30, 40]");
+print("Sum: " + toString(sum(arrayList)));
+print("Method syntax sum: " + toString(arrayList.sum));
+
+// Adding elements
+arrayList.add(50);
+print("After adding 50: " + toString(sum(arrayList)));
+
+print("\n=== Set ===");
+
+let numberSet = Set[1, 2, 3, 4, 5, 3, 2];  // Duplicates will be removed
+print("Set: {1, 2, 3, 4, 5} (duplicates removed)");
+print("Sum: " + toString(sum(numberSet)));
+print("Method syntax sum: " + toString(numberSet.sum));
+
+// Set with strings that are numbers
+let stringSet = Set["10", "20", "30"];
+print("String number set sum: " + toString(sum(stringSet)));
+
+print("\n=== Map ===");
+
+let ages = Map["Alice" -> 25, "Bob" -> 30, "Charlie" -> 35];
+print("Map: {Alice: 25, Bob: 30, Charlie: 35}");
+print("Alice's age: " + toString(ages["Alice"]));
+print("Sum of ages: " + toString(sum(ages)));
+
+// Adding to map
+ages["Diana"] = 28;
+print("After adding Diana (28): " + toString(sum(ages)));
+
+print("\n=== Stack (LIFO) ===");
+
+let stack = Stack[1, 2, 3, 4, 5];
+print("Stack: [1, 2, 3, 4, 5] (top is 5)");
+print("Sum: " + toString(sum(stack)));
+print("Method syntax sum: " + toString(stack.sum));
+
+// Stack operations
+stack.push(6);
+print("After pushing 6: " + toString(sum(stack)));
+
+let popped = stack.pop();
+print("Popped: " + toString(popped));
+print("Sum after pop: " + toString(sum(stack)));
+
+print("\n=== Queue (FIFO) ===");
+
+let queue = Queue[10, 20, 30, 40];
+print("Queue: [10, 20, 30, 40] (front is 10)");
+print("Sum: " + toString(sum(queue)));
+print("Method syntax sum: " + toString(queue.sum));
+
+// Queue operations
+queue.enqueue(50);
+print("After enqueuing 50: " + toString(sum(queue)));
+
+let dequeued = queue.dequeue();
+print("Dequeued: " + toString(dequeued));
+print("Sum after dequeue: " + toString(sum(queue)));
+
+print("\n=== Data Structure Comparison ===");
+
+let arrayData = [1, 2, 3];
+let listData = ArrayList[1, 2, 3];
+let setData = Set[1, 2, 3];
+let stackData = Stack[1, 2, 3];
+let queueData = Queue[1, 2, 3];
+
+print("All contain [1, 2, 3]:");
+print("Array sum: " + toString(sum(arrayData)));
+print("ArrayList sum: " + toString(sum(listData)));
+print("Set sum: " + toString(sum(setData)));
+print("Stack sum: " + toString(sum(stackData)));
+print("Queue sum: " + toString(sum(queueData)));
+
+print("\n=== Mixed Type Handling ===");
+
+// Mixed integers and floats
+let mixedNumbers = [1, 2.5, 3, 4.7, 5];
+print("Mixed int/float array: " + toString(sum(mixedNumbers)));
+
+// Large numbers
+let largeNumbers = [1000, 2000, 3000];
+print("Large numbers sum: " + toString(sum(largeNumbers)));
+
+print("\n=== Empty Collections ===");
+
+let emptyArray = [];
+let emptyList = ArrayList[];
+let emptySet = Set[];
+
+print("Empty array sum: " + toString(sum(emptyArray)));
+print("Empty ArrayList sum: " + toString(sum(emptyList)));
+print("Empty Set sum: " + toString(sum(emptySet)));

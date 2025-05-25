@@ -1,0 +1,113 @@
+// Oxide Functions and Multiple Return Values
+// Regular functions, multiple returns, and Go-style syntax
+
+print("=== Basic Functions ===");
+
+// Simple function
+fn greet(string name) string {
+    return "Hello, " + name + "!";
+}
+
+print(greet("Alice"));
+print(greet("Bob"));
+
+// Function with multiple parameters
+fn add(int a, int b) int {
+    return a + b;
+}
+
+print("5 + 3 = " + toString(add(5, 3)));
+
+// Function without return type
+fn sayHello(string name) {
+    print("Greetings, " + name + "!");
+}
+
+sayHello("Charlie");
+
+print("\n=== Multiple Return Values (Go-style) ===");
+
+// Function returning two values
+fn divmod(int a, int b) (int, int) {
+    let quotient = a / b;
+    let remainder = a % b;
+    return quotient, remainder;
+}
+
+let q, r := divmod(17, 5);
+print("17 ÷ 5 = " + toString(q) + " remainder " + toString(r));
+
+// Function returning three values
+fn getPersonInfo(string name) (string, int, bool) {
+    if (name == "Alice") {
+        return "Alice Johnson", 25, true;
+    } else if (name == "Bob") {
+        return "Bob Smith", 30, false;
+    } else {
+        return "Unknown", 0, false;
+    }
+}
+
+let fullName, age, isActive := getPersonInfo("Alice");
+print("Person: " + fullName + ", Age: " + toString(age) + ", Active: " + toString(isActive));
+
+print("\n=== Error Handling Pattern ===");
+
+// Go-style error handling with multiple returns
+fn safeDivide(int a, int b) (int, bool) {
+    if (b == 0) {
+        return 0, false;  // error case
+    } else {
+        return a / b, true;  // success case
+    }
+}
+
+let result1, success1 := safeDivide(10, 2);
+if (success1) {
+    print("10 / 2 = " + toString(result1));
+} else {
+    print("Division failed");
+}
+
+let result2, success2 := safeDivide(10, 0);
+if (success2) {
+    print("10 / 0 = " + toString(result2));
+} else {
+    print("Division by zero error");
+}
+
+print("\n=== Array Processing ===");
+
+// Function that returns array statistics
+fn arrayStats(int[] arr) (int, int, int) {
+    let sum = 0;
+    let min = arr[0];
+    let max = arr[0];
+
+    for i in arr {
+        sum = sum + i;
+        if (i < min) {
+            min = i;
+        }
+        if (i > max) {
+            max = i;
+        }
+    }
+
+    return sum, min, max;
+}
+
+let numbers = [5, 2, 8, 1, 9, 3];
+let total, minimum, maximum := arrayStats(numbers);
+print("Array: [5, 2, 8, 1, 9, 3]");
+print("Sum: " + toString(total) + ", Min: " + toString(minimum) + ", Max: " + toString(maximum));
+
+print("\n=== Coordinate System ===");
+
+// Function returning coordinates
+fn getCoordinates() (int, int, int) {
+    return 10, 20, 30;
+}
+
+let x, y, z := getCoordinates();
+print("3D Coordinates: x=" + toString(x) + ", y=" + toString(y) + ", z=" + toString(z));

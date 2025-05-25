@@ -1,101 +1,176 @@
-# Oxide Examples
+# Oxide Programming Language Examples
 
-This directory contains organized examples demonstrating Oxide language features.
+This directory contains 10 comprehensive examples showcasing all major features of the Oxide programming language.
 
 ## Quick Start
 
+Run any example with:
 ```bash
-# Run the main demo showcasing all features
-cargo run examples/demo.ox
-
-# Run the comprehensive do-while example
-cargo run examples/do_while_working.ox
-
-# Run the automatic methods demo
-cargo run examples/automatic_methods_demo.ox
-
-# Run the tuple and pattern matching demo
-cargo run examples/tuple_guard_demo.ox
-
-# Run the new features demo
-cargo run examples/working_features_demo.ox
+cargo run examples/[filename].ox
 ```
 
-## Directory Structure
+## Examples Overview
 
+### 1. **01_basics.ox** - Language Fundamentals
+- Variables and types (`let`, `var`, `int`, `string`, `bool`)
+- Arithmetic and logical operators
+- Control flow (`if`, `for`, `while`)
+- String operations
+
+### 2. **02_functions.ox** - Functions and Multiple Returns
+- Basic function definitions
+- **Go-style multiple return values**: `fn name() (type1, type2)`
+- Multiple assignment: `let a, b := function_call()`
+- Error handling patterns
+
+### 3. **03_data_structures.ox** - Built-in Data Types
+- Arrays: `[1, 2, 3]`
+- ArrayList: `ArrayList[1, 2, 3]`
+- Set: `Set[1, 2, 3]` (duplicates removed)
+- Map: `Map["key" -> value]`
+- Stack: `Stack[1, 2, 3]` (LIFO)
+- Queue: `Queue[1, 2, 3]` (FIFO)
+- **Sum function**: Works on all data structures
+
+### 4. **04_classes_oop.ox** - Object-Oriented Programming
+- Class definitions and inheritance (`extends`)
+- Automatic getter/setter generation
+- Method definitions
+- Class composition patterns
+
+### 5. **05_bitwise_operations.ox** - Bitwise and Number Systems
+- Bitwise operators: `&`, `|`, `^`, `~`, `<<`, `>>`
+- Number base conversions: `toBinary()`, `toHex()`, `toDecimal()`
+- Bit manipulation patterns
+- Advanced bit operations
+
+### 6. **06_pattern_matching.ox** - Pattern Matching and Tuples
+- Match expressions with guards
+- Tuple creation and destructuring: `(a, b, c)`
+- Tuple access: `tuple.0`, `tuple.1`
+- Complex pattern matching
+
+### 7. **07_higher_order_functions.ox** - Functional Programming
+- Higher-order functions: `map()`, `filter()`, `fold()`
+- Function composition
+- Functional programming patterns
+- Custom higher-order functions
+
+### 8. **08_pointers_memory.ox** - Pointers and Memory
+- Pointer creation: `&variable`
+- Dereferencing: `*pointer`
+- Null pointer safety
+- Memory management patterns
+
+### 9. **09_advanced_features.ox** - Advanced Language Features
+- Do-while loops
+- Complex if expressions
+- Advanced pattern matching
+- Mathematical constants (`PI`, `E`, `PHI`, `AVOGADRO`)
+- Recursive functions
+
+### 10. **10_comprehensive_demo.ox** - Complete Feature Showcase
+- All major features in one cohesive example
+- Student management system demonstration
+- Real-world usage patterns
+
+## Key Features Demonstrated
+
+### ✅ **Go-Style Multiple Return Values**
+```oxide
+fn divmod(int a, int b) (int, int) {
+    return a / b, a % b;
+}
+
+let quotient, remainder := divmod(17, 5);
 ```
-examples/
-├── demo.ox                      # Main comprehensive demo
-├── do_while_working.ox          # Do-while loop examples
-├── automatic_methods_demo.ox    # OOP with automatic method generation
-├── tuple_guard_demo.ox          # Advanced pattern matching with tuples
-├── working_features_demo.ox     # New features: bitwise, conversions, sum, inheritance
-├── basic_examples/              # Core language features
-├── language_features/           # Advanced language features
-├── data_structures/             # Built-in data structures
-├── higher_order_functions/      # Functional programming
-├── stdlib_tests/                # Standard library tests
-├── demos/                       # Feature demonstrations
-└── debugging/                   # Debug examples and known issues
+
+### ✅ **Universal Sum Function**
+```oxide
+let array = [1, 2, 3];
+let list = ArrayList[4, 5, 6];
+let set = Set[7, 8, 9];
+
+print(toString(sum(array)));  // Works on all data structures
+print(toString(list.sum));    // Method syntax also available
 ```
 
-## Key Examples
+### ✅ **Object-Oriented Programming**
+```oxide
+class Animal {
+    name
+    fn makeSound() { print(name + " makes a sound"); }
+}
 
-### Core Features
-- **`demo.ox`** - Comprehensive showcase of all major features
-- **`basic_examples/comprehensive_new_syntax_demo.ox`** - Complete syntax overview
-- **`basic_examples/syntax_features_summary.ox`** - Syntax feature summary
+class Dog extends Animal {
+    breed
+    fn bark() { print(name + " barks!"); }
+}
+```
 
-### Object-Oriented Programming
-- **`automatic_methods_demo.ox`** - Automatic getter/setter generation
-- **`language_features/enhanced_classes.ox`** - Advanced class features
+### ✅ **Pattern Matching with Tuples**
+```oxide
+fn analyzePoint(tuple point) string {
+    return match point {
+        (0, 0) => "Origin",
+        (x, 0) => "On X-axis",
+        (x, y) if x == y => "Diagonal",
+        _ => "Other location"
+    };
+}
+```
 
-### Functional Programming
-- **`higher_order_functions/`** - Map, filter, fold, compose examples
-- **`basic_examples/test_haskell_style_map.ox`** - Haskell-style function composition
+### ✅ **Bitwise Operations**
+```oxide
+let a = 12;  // 1100 in binary
+let b = 10;  // 1010 in binary
+print(toString(a & b));      // Bitwise AND
+print(toBinary(a << 1));     // Left shift to binary
+```
 
-### Pattern Matching
-- **`tuple_guard_demo.ox`** - Advanced tuple patterns with guards
-- **`language_features/pattern_matching/`** - Comprehensive pattern matching examples
+### ✅ **Higher-Order Functions**
+```oxide
+fn square(int x) int { return x * x; }
+let numbers = [1, 2, 3, 4, 5];
+let squared = map(numbers, square);
+```
 
-### Data Structures
-- **`data_structures/`** - ArrayList, Set, Map, Stack, Queue examples
-- **`basic_examples/test_map_vs_Map.ox`** - Map function vs Map data structure
+### ✅ **Safe Pointer Operations**
+```oxide
+let value = 42;
+let ptr = &value;
+*ptr = 100;  // Modify through pointer
+```
 
 ## Running Examples
 
 ```bash
-# Basic syntax and features
-cargo run examples/basic_examples/comprehensive_new_syntax_demo.ox
+# Run the comprehensive demo (recommended first)
+cargo run examples/10_comprehensive_demo.ox
 
-# Pattern matching
-cargo run examples/language_features/pattern_matching/basic_match.ox
+# Run specific feature examples
+cargo run examples/02_functions.ox          # Multiple return values
+cargo run examples/03_data_structures.ox    # Data structures and sum
+cargo run examples/04_classes_oop.ox        # Object-oriented programming
+cargo run examples/06_pattern_matching.ox   # Pattern matching and tuples
 
-# Data structures
-cargo run examples/data_structures/arraylist_demo.ox
-
-# Higher-order functions
-cargo run examples/higher_order_functions/map_filter_fold.ox
-
-# Standard library
-cargo run examples/stdlib_tests/math_functions.ox
+# Run all examples in order
+for i in {01..10}; do
+    echo "Running example $i..."
+    cargo run examples/${i}_*.ox
+    echo "---"
+done
 ```
 
-## Features Demonstrated
+## Language Features Summary
 
-- ✅ Variable declarations (`var`, `let`, typed)
-- ✅ Arithmetic and compound operators
-- ✅ Control flow (if expressions, for loops)
-- ✅ Functions and arrow functions
-- ✅ Pattern matching with guards
-- ✅ Object-oriented programming
-- ✅ Automatic method generation
-- ✅ Data structures (ArrayList, Set, Map, etc.)
-- ✅ Higher-order functions
-- ✅ Error handling
-- ✅ String and math functions
-- ✅ Type checking and conversions
-- ✅ Bitwise operations (`&`, `|`, `^`, `~`, `<<`, `>>`)
-- ✅ Number base conversions (`toBinary`, `toHex`, `toDecimal`)
-- ✅ Sum function for data structures
-- ✅ Basic inheritance with `extends` keyword
+- **Type System**: `int`, `string`, `bool`, `real`, arrays, custom classes
+- **Functions**: Single and multiple return values, Go-style syntax
+- **Data Structures**: Array, ArrayList, Set, Map, Stack, Queue with universal `sum()`
+- **OOP**: Classes, inheritance, automatic getters/setters
+- **Pattern Matching**: Match expressions, guards, tuple destructuring
+- **Functional**: Higher-order functions, map/filter/fold
+- **Systems**: Pointers, memory management, bitwise operations
+- **Advanced**: Do-while loops, mathematical constants, recursion
+
+Oxide combines the best of modern programming languages with safety, expressiveness, and performance.

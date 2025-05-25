@@ -1,0 +1,136 @@
+// Oxide Bitwise Operations and Number Base Conversions
+// Bitwise operators, binary/hex conversions, and bit manipulation
+
+print("=== Basic Bitwise Operations ===");
+
+let a = 12;  // 1100 in binary
+let b = 10;  // 1010 in binary
+
+print("a = " + toString(a) + " (binary: " + toBinary(a) + ")");
+print("b = " + toString(b) + " (binary: " + toBinary(b) + ")");
+
+print("\nBitwise AND (&):");
+print("a & b = " + toString(a & b) + " (binary: " + toBinary(a & b) + ")");
+
+print("\nBitwise OR (|):");
+print("a | b = " + toString(a | b) + " (binary: " + toBinary(a | b) + ")");
+
+print("\nBitwise XOR (^):");
+print("a ^ b = " + toString(a ^ b) + " (binary: " + toBinary(a ^ b) + ")");
+
+print("\nBitwise NOT (~):");
+print("~a = " + toString(~a) + " (binary: " + toBinary(~a) + ")");
+
+print("\nLeft Shift (<<):");
+print("a << 1 = " + toString(a << 1) + " (binary: " + toBinary(a << 1) + ")");
+print("a << 2 = " + toString(a << 2) + " (binary: " + toBinary(a << 2) + ")");
+
+print("\nRight Shift (>>):");
+print("a >> 1 = " + toString(a >> 1) + " (binary: " + toBinary(a >> 1) + ")");
+print("a >> 2 = " + toString(a >> 2) + " (binary: " + toBinary(a >> 2) + ")");
+
+print("\n=== Number Base Conversions ===");
+
+let num = 255;
+print("Decimal: " + toString(num));
+print("Binary: " + toBinary(num));
+print("Hexadecimal: " + toHex(num));
+
+print("\nPowers of 2:");
+let powers = [1, 2, 4, 8, 16, 32, 64, 128];
+for power in powers {
+    print("Dec: " + toString(power) + " | Bin: " + toBinary(power) + " | Hex: " + toHex(power));
+}
+
+print("\n=== Converting FROM Binary/Hex ===");
+
+let binaryStr = "1111";  // 15 in decimal
+let hexStr = "FF";       // 255 in decimal
+let binaryStr2 = "1010"; // 10 in decimal
+
+print("Binary '" + binaryStr + "' to decimal: " + toString(toDecimal(binaryStr)));
+print("Hex '" + hexStr + "' to decimal: " + toString(toDecimal(hexStr)));
+print("Binary '" + binaryStr2 + "' to decimal: " + toString(toDecimal(binaryStr2)));
+
+print("\n=== Bit Manipulation Patterns ===");
+
+// Setting bits
+let flags = 0;
+print("Initial flags: " + toString(flags) + " (binary: " + toBinary(flags) + ")");
+
+flags = flags | 1;      // Set bit 0
+print("Set bit 0: " + toString(flags) + " (binary: " + toBinary(flags) + ")");
+
+flags = flags | 4;      // Set bit 2
+print("Set bit 2: " + toString(flags) + " (binary: " + toBinary(flags) + ")");
+
+flags = flags | 8;      // Set bit 3
+print("Set bit 3: " + toString(flags) + " (binary: " + toBinary(flags) + ")");
+
+// Checking bits
+let mask1 = 1;   // Check bit 0
+let mask2 = 4;   // Check bit 2
+let mask3 = 2;   // Check bit 1
+
+print("\nChecking bits:");
+print("Bit 0 set? " + toString((flags & mask1) != 0));
+print("Bit 1 set? " + toString((flags & mask3) != 0));
+print("Bit 2 set? " + toString((flags & mask2) != 0));
+
+// Clearing bits
+print("\nClearing bit 2:");
+flags = flags & (~4);   // Clear bit 2
+print("After clearing bit 2: " + toString(flags) + " (binary: " + toBinary(flags) + ")");
+
+print("\n=== Advanced Bit Operations ===");
+
+// Swapping values using XOR
+let x = 25;
+let y = 30;
+print("Before swap: x = " + toString(x) + ", y = " + toString(y));
+
+x = x ^ y;
+y = x ^ y;
+x = x ^ y;
+
+print("After XOR swap: x = " + toString(x) + ", y = " + toString(y));
+
+// Checking if number is power of 2
+fn isPowerOfTwo(int n) bool {
+    return n > 0 && (n & (n - 1)) == 0;
+}
+
+let testNumbers = [1, 2, 3, 4, 5, 8, 15, 16, 32, 33];
+print("\nPower of 2 check:");
+for num in testNumbers {
+    print(toString(num) + " is power of 2: " + toString(isPowerOfTwo(num)));
+}
+
+print("\n=== Bit Counting ===");
+
+// Count set bits (population count)
+fn countSetBits(int n) int {
+    let count = 0;
+    while (n > 0) {
+        count = count + (n & 1);
+        n = n >> 1;
+    }
+    return count;
+}
+
+let testValues = [7, 15, 31, 63, 127];
+print("Counting set bits:");
+for val in testValues {
+    print(toString(val) + " (binary: " + toBinary(val) + ") has " + toString(countSetBits(val)) + " set bits");
+}
+
+print("\n=== Bitwise Summary ===");
+print("& (AND): Both bits must be 1");
+print("| (OR): At least one bit must be 1");
+print("^ (XOR): Bits must be different");
+print("~ (NOT): Flips all bits");
+print("<< (Left Shift): Multiply by 2^n");
+print(">> (Right Shift): Divide by 2^n");
+print("toBinary(): Convert to binary string");
+print("toHex(): Convert to hexadecimal string");
+print("toDecimal(): Convert from binary/hex string to decimal");

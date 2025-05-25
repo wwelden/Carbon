@@ -1,0 +1,197 @@
+// Oxide Object-Oriented Programming
+// Classes, inheritance, automatic methods, and OOP patterns
+
+print("=== Basic Classes ===");
+
+class Person {
+    name
+    age
+}
+
+let person = new Person();
+person.setName("Alice");
+person.setAge(25);
+
+print("Person: " + person.getName() + ", Age: " + toString(person.getAge()));
+
+print("\n=== Class with Methods ===");
+
+class Calculator {
+    result
+
+    fn add(int value) {
+        result = result + value;
+    }
+
+    fn multiply(int value) {
+        result = result * value;
+    }
+
+    fn reset() {
+        result = 0;
+    }
+}
+
+let calc = new Calculator();
+calc.reset();
+calc.add(10);
+calc.multiply(3);
+print("Calculator result: " + toString(calc.getResult()));
+
+print("\n=== Inheritance ===");
+
+class Animal {
+    name
+    species
+
+    fn makeSound() {
+        print(name + " makes a sound");
+    }
+}
+
+class Dog extends Animal {
+    breed
+
+    fn bark() {
+        print(name + " barks: Woof!");
+    }
+
+    fn fetch() {
+        print(name + " fetches the ball");
+    }
+}
+
+let dog = new Dog();
+dog.setName("Buddy");
+dog.setSpecies("Canine");
+dog.setBreed("Golden Retriever");
+
+print("Dog: " + dog.getName() + " (" + dog.getBreed() + ")");
+dog.makeSound();  // Inherited method
+dog.bark();       // Dog-specific method
+dog.fetch();
+
+print("\n=== Multiple Inheritance Levels ===");
+
+class Vehicle {
+    brand
+    year
+
+    fn start() {
+        print(brand + " vehicle starting...");
+    }
+}
+
+class Car extends Vehicle {
+    doors
+
+    fn drive() {
+        print("Driving the " + brand + " car");
+    }
+}
+
+class SportsCar extends Car {
+    topSpeed
+
+    fn race() {
+        print("Racing the " + brand + " at " + toString(topSpeed) + " mph!");
+    }
+}
+
+let ferrari = new SportsCar();
+ferrari.setBrand("Ferrari");
+ferrari.setYear(2023);
+ferrari.setDoors(2);
+ferrari.setTopSpeed(200);
+
+print("Sports Car: " + toString(ferrari.getYear()) + " " + ferrari.getBrand());
+print("Doors: " + toString(ferrari.getDoors()) + ", Top Speed: " + toString(ferrari.getTopSpeed()));
+ferrari.start();  // From Vehicle
+ferrari.drive();  // From Car
+ferrari.race();   // From SportsCar
+
+print("\n=== Automatic Getter/Setter Generation ===");
+
+class Book {
+    title
+    author
+    pages
+    isbn
+}
+
+let book = new Book();
+book.setTitle("The Oxide Programming Guide");
+book.setAuthor("Jane Developer");
+book.setPages(350);
+book.setIsbn("978-0123456789");
+
+print("Book: '" + book.getTitle() + "' by " + book.getAuthor());
+print("Pages: " + toString(book.getPages()) + ", ISBN: " + book.getIsbn());
+
+print("\n=== Class Composition ===");
+
+class Address {
+    street
+    city
+    zipCode
+}
+
+class Employee extends Person {
+    employeeId
+    department
+    address
+
+    fn getFullAddress() string {
+        if (address != null) {
+            return address.getStreet() + ", " + address.getCity() + " " + address.getZipCode();
+        } else {
+            return "No address set";
+        }
+    }
+}
+
+let employee = new Employee();
+employee.setName("John Smith");
+employee.setAge(30);
+employee.setEmployeeId(12345);
+employee.setDepartment("Engineering");
+
+let addr = new Address();
+addr.setStreet("123 Main St");
+addr.setCity("Tech City");
+addr.setZipCode("12345");
+employee.setAddress(addr);
+
+print("Employee: " + employee.getName() + " (ID: " + toString(employee.getEmployeeId()) + ")");
+print("Department: " + employee.getDepartment());
+print("Address: " + employee.getFullAddress());
+
+print("\n=== Class with State Management ===");
+
+class BankAccount {
+    accountNumber
+    balance
+
+    fn deposit(int amount) {
+        balance = balance + amount;
+        print("Deposited $" + toString(amount) + ". New balance: $" + toString(balance));
+    }
+
+    fn withdraw(int amount) {
+        if (balance >= amount) {
+            balance = balance - amount;
+            print("Withdrew $" + toString(amount) + ". New balance: $" + toString(balance));
+        } else {
+            print("Insufficient funds. Current balance: $" + toString(balance));
+        }
+    }
+}
+
+let account = new BankAccount();
+account.setAccountNumber(123456789);
+account.setBalance(1000);
+
+print("Account: " + toString(account.getAccountNumber()) + ", Initial balance: $" + toString(account.getBalance()));
+account.deposit(500);
+account.withdraw(200);
+account.withdraw(2000);  // Should fail
