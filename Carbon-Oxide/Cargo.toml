@@ -1,0 +1,43 @@
+[package]
+name = "carbon_interpreter"
+version = "0.1.0"
+edition = "2021"
+description = "Carbon Programming Language Interpreter - A modern language with syntax from Go, JavaScript, Rust, Haskell, C#, Java, and C"
+authors = ["Your Name <your.email@example.com>"]
+
+[[bin]]
+name = "carbon"
+path = "src/main.rs"
+
+[dependencies]
+# For error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# For regex support in lexer
+regex = "1.10"
+
+# For command line argument parsing
+clap = { version = "4.4", features = ["derive"] }
+
+# For colored output
+colored = "2.0"
+
+# For reading input in REPL
+rustyline = "13.0"
+
+# For floating point operations
+num-traits = "0.2"
+
+# For parsing numbers
+lexical = "6.1"
+
+[dev-dependencies]
+# For testing
+criterion = "0.5"
+tokio-test = "0.4"
+tempfile = "3.8"
+proptest = "1.0"
+assert_cmd = "2.0"
+predicates = "3.0"
+serial_test = "3.0"

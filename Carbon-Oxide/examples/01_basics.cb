@@ -1,0 +1,71 @@
+// Carbon Language Basics
+// Variables, operators, and control flow
+
+print("=== Variables and Types ===");
+
+// Variable declarations
+let name = "Carbon";
+let version = 1;
+let isActive = true;
+var counter = 0;
+
+print("Language: " + name);
+print("Version: " + toString(version));
+print("Active: " + toString(isActive));
+
+print("=== Arithmetic Operations ===");
+
+let a = 15;
+let b = 4;
+
+print("a = " + toString(a) + ", b = " + toString(b));
+print("Addition: " + toString(a + b));
+print("Subtraction: " + toString(a - b));
+print("Multiplication: " + toString(a * b));
+print("Division: " + toString(a / b));
+print("Modulo: " + toString(a % b));
+
+print("=== Compound Assignment ===");
+
+counter += 5;
+print("After += 5: " + toString(counter));
+counter *= 2;
+print("After *= 2: " + toString(counter));
+
+print("=== Comparison and Logic ===");
+
+print("a > b: " + toString(a > b));
+print("a == 15: " + toString(a == 15));
+print("isActive && (a > 10): " + toString(isActive && (a > 10)));
+
+print("=== Control Flow ===");
+
+// If expressions
+let result = if (a > b) {
+    "a is greater"
+} else {
+    "b is greater or equal"
+};
+print("Comparison result: " + result);
+
+// For-in loops
+print("For-in loop example:");
+for i in [1, 2, 3, 4, 5] {
+    print("  Processing: " + toString(i));
+}
+
+// Go-style while loop
+print("Go-style while loop:");
+var countdown = 3;
+for (countdown > 0) {
+    print("  " + toString(countdown));
+    countdown -= 1;
+}
+print("  Blast off!");
+
+print("=== String Operations ===");
+
+let greeting = "Hello";
+let target = "World";
+let message = greeting + ", " + target + "!";
+print("Message: " + message);
