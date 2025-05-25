@@ -260,6 +260,24 @@ impl Evaluator {
                 self.eval_pointer_assignment(ptr_value, new_value)?;
                 Ok(Some(Value::Null))
             }
+            Statement::MultipleAssignStmt(vars, expr) => {
+                let value = self.eval_expr(context, expr)?;
+                match value {
+                    Value::Tuple(values) => {
+                        if vars.len() != values.len() {
+                            return Err(CarbonError::runtime_error(&format!(
+                                "Cannot assign {} values to {} variables",
+                                values.len(), vars.len()
+                            )));
+                        }
+                        for (var, val) in vars.iter().zip(values.iter()) {
+                            context.env.insert(var.clone(), val.clone());
+                        }
+                        Ok(Some(Value::Tuple(values)))
+                    }
+                    _ => Err(CarbonError::type_error("Multiple assignment requires a tuple or multiple return values")),
+                }
+            }
             Statement::ReturnStmt(expr) => {
                 let value = self.eval_expr(context, expr)?;
                 Ok(Some(value))
@@ -444,6 +462,10 @@ impl Evaluator {
             Expr::PtrDecrementExpr(ptr_expr) => {
                 let ptr_value = self.eval_expr(context, *ptr_expr)?;
                 self.eval_pointer_arithmetic(ptr_value, -1)
+            }
+            Expr::MultipleReturnExpr(exprs) => {
+                let values = self.eval_expr_collection(context, exprs)?;
+                Ok(Value::Tuple(values))
             }
 
             // Binary operations
@@ -1035,7 +1057,7 @@ impl Evaluator {
         }
     }
 
-    fn apply_function(&mut self, context: &mut Context, func: Value, arg: Value) -> Result<Value> {
+    pub fn apply_function(&mut self, context: &mut Context, func: Value, arg: Value) -> Result<Value> {
         match func {
             Value::Function { env, param, body } => {
                 let mut func_env = env;
@@ -1048,21 +1070,45 @@ impl Evaluator {
                 result
             }
             Value::TypedFunction { env, params, statements, return_expr, .. } => {
-                if params.len() != 1 {
-                    return Err(CarbonError::arity_mismatch(params.len(), 1));
-                }
-
                 let mut func_env = env;
-                func_env.insert(params[0].1.clone(), arg);
+
+                // Handle multiple parameters
+                match arg {
+                    Value::Tuple(args) => {
+                        // Multiple arguments passed as a tuple
+                        if params.len() != args.len() {
+                            return Err(CarbonError::arity_mismatch(params.len(), args.len()));
+                        }
+                        for (i, (_, param_name)) in params.iter().enumerate() {
+                            func_env.insert(param_name.clone(), args[i].clone());
+                        }
+                    }
+                    Value::Null if params.is_empty() => {
+                        // No parameters expected and none provided
+                    }
+                    single_arg => {
+                        // Single argument
+                        if params.len() != 1 {
+                            return Err(CarbonError::arity_mismatch(params.len(), 1));
+                        }
+                        func_env.insert(params[0].1.clone(), single_arg);
+                    }
+                }
 
                 let old_env = std::mem::replace(&mut context.env, func_env);
 
                 // Execute statements
                 for stmt in statements {
-                    self.eval_statement(context, stmt)?;
+                    if let Some(return_val) = self.eval_statement(context, stmt.clone())? {
+                        // Check if this is a return statement
+                        if matches!(stmt, Statement::ReturnStmt(_)) {
+                            context.env = old_env;
+                            return Ok(return_val);
+                        }
+                    }
                 }
 
-                // Evaluate return expression
+                // Evaluate return expression if no explicit return was encountered
                 let result = self.eval_expr(context, *return_expr);
                 context.env = old_env;
 
@@ -1474,9 +1520,9 @@ impl Evaluator {
                 })
             }
             "sum" => {
-                // sum() takes an array directly (no currying needed)
+                // sum() takes an array, arraylist, set, stack, or queue directly (no currying needed)
                 match arg {
-                    Value::Array(_) => {
+                    Value::Array(_) | Value::ArrayList(_) | Value::Set(_) | Value::Stack(_) | Value::Queue(_) => {
                         let mut env = context.env.clone();
                         env.insert("array".to_string(), arg);
                         let old_env = std::mem::replace(&mut context.env, env);
@@ -1484,7 +1530,7 @@ impl Evaluator {
                         context.env = old_env;
                         result
                     }
-                    _ => Err(CarbonError::type_error("sum requires an array"))
+                    _ => Err(CarbonError::type_error("sum requires an array, arraylist, set, stack, or queue"))
                 }
             }
             "product" => {
@@ -2747,7 +2793,91 @@ impl Evaluator {
                     Ok(Value::Real(sum))
                 }
             }
-            _ => Err(CarbonError::type_error("sum requires an array")),
+            Value::ArrayList(values) => {
+                let mut sum = 0.0;
+                let mut is_int = true;
+
+                for value in values {
+                    match value {
+                        Value::Int(i) => sum += i as f64,
+                        Value::Real(r) => {
+                            sum += r;
+                            is_int = false;
+                        }
+                        _ => return Err(CarbonError::type_error("sum requires an arraylist of numbers")),
+                    }
+                }
+
+                if is_int {
+                    Ok(Value::Int(sum as i64))
+                } else {
+                    Ok(Value::Real(sum))
+                }
+            }
+            Value::Set(set) => {
+                let mut sum = 0.0;
+                let mut is_int = true;
+
+                for str_val in set {
+                    if let Ok(i) = str_val.parse::<i64>() {
+                        sum += i as f64;
+                    } else if let Ok(f) = str_val.parse::<f64>() {
+                        sum += f;
+                        is_int = false;
+                    } else {
+                        return Err(CarbonError::type_error("sum requires a set of numbers"));
+                    }
+                }
+
+                if is_int {
+                    Ok(Value::Int(sum as i64))
+                } else {
+                    Ok(Value::Real(sum))
+                }
+            }
+            Value::Stack(values) => {
+                let mut sum = 0.0;
+                let mut is_int = true;
+
+                for value in values {
+                    match value {
+                        Value::Int(i) => sum += i as f64,
+                        Value::Real(r) => {
+                            sum += r;
+                            is_int = false;
+                        }
+                        _ => return Err(CarbonError::type_error("sum requires a stack of numbers")),
+                    }
+                }
+
+                if is_int {
+                    Ok(Value::Int(sum as i64))
+                } else {
+                    Ok(Value::Real(sum))
+                }
+            }
+            Value::Queue(values) => {
+                let mut sum = 0.0;
+                let mut is_int = true;
+
+                for value in values {
+                    match value {
+                        Value::Int(i) => sum += i as f64,
+                        Value::Real(r) => {
+                            sum += r;
+                            is_int = false;
+                        }
+                        _ => return Err(CarbonError::type_error("sum requires a queue of numbers")),
+                    }
+                }
+
+                if is_int {
+                    Ok(Value::Int(sum as i64))
+                } else {
+                    Ok(Value::Real(sum))
+                }
+            }
+            _ => Err(CarbonError::type_error("sum requires an array, arraylist, set, stack, or queue")),
         }
     }
 
@@ -3420,6 +3550,37 @@ impl Evaluator {
                     Ok(Value::Int(sum))
                 }
             }
+            Value::Set(set) => {
+                let mut sum = 0i64;
+                let mut float_sum = 0.0f64;
+                let mut is_float = false;
+
+                for str_val in set {
+                    // Try to parse the string as a number
+                    if let Ok(i) = str_val.parse::<i64>() {
+                        if is_float {
+                            float_sum += i as f64;
+                        } else {
+                            sum += i;
+                        }
+                    } else if let Ok(f) = str_val.parse::<f64>() {
+                        if !is_float {
+                            float_sum = sum as f64 + f;
+                            is_float = true;
+                        } else {
+                            float_sum += f;
+                        }
+                    } else {
+                        return Err(CarbonError::type_error("sum() can only be applied to sets of numbers"));
+                    }
+                }
+
+                if is_float {
+                    Ok(Value::Real(float_sum))
+                } else {
+                    Ok(Value::Int(sum))
+                }
+            }
             Value::Stack(stack) => {
                 let mut sum = 0i64;
                 let mut float_sum = 0.0f64;
@@ -3484,7 +3645,7 @@ impl Evaluator {
                     Ok(Value::Int(sum))
                 }
             }
-            _ => Err(CarbonError::type_error("sum() can only be applied to arrays, arraylists, stacks, or queues")),
+            _ => Err(CarbonError::type_error("sum() can only be applied to arrays, arraylists, sets, stacks, or queues")),
         }
     }
 

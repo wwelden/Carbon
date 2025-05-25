@@ -63,6 +63,7 @@ pub enum Token {
 
     // Assignment
     Assign,
+    MultipleAssign,  // :=
 
     // Keywords
     Let,
@@ -94,7 +95,7 @@ pub enum Token {
     ToBinary,
     ToHex,
     ToDecimal,
-    Sum,
+
 
     // Types
     IntType,
@@ -188,7 +189,13 @@ impl Lexer {
             ',' => Ok(Some(Token::Comma)),
             '.' => Ok(Some(Token::Dot)),
             '?' => Ok(Some(Token::Question)),
-            ':' => Ok(Some(Token::Colon)),
+            ':' => {
+                if self.match_char('=') {
+                    Ok(Some(Token::MultipleAssign))
+                } else {
+                    Ok(Some(Token::Colon))
+                }
+            }
             '|' => {
                 if self.match_char('|') {
                     Ok(Some(Token::Or))
@@ -423,7 +430,7 @@ impl Lexer {
             "toBinary" => Token::ToBinary,
             "toHex" => Token::ToHex,
             "toDecimal" => Token::ToDecimal,
-            "sum" => Token::Sum,
+
 
             // Types
             "int" => Token::IntType,

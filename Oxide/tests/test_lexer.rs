@@ -242,7 +242,7 @@ mod lexer_tests {
             Token::Arrow,
             Token::Question,
             Token::Colon,
-            Token::Pipe,
+            Token::BitOr,
             Token::Wildcard,
             Token::Eof
         ]);
@@ -398,7 +398,7 @@ mod lexer_tests {
     fn test_pattern_matching_syntax() {
         let tokens = tokenize_string("| x if x > 0 => \"positive\"");
         assert_eq!(tokens, vec![
-            Token::Pipe,
+            Token::BitOr,
             Token::Identifier("x".to_string()),
             Token::If,
             Token::Identifier("x".to_string()),

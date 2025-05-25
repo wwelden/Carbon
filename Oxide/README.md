@@ -156,10 +156,8 @@ bin/oxide
 - Do while loops
 - Return multiple values
 - Advanced generics with constraints
-- ~~Advanced pointer arithmetic~~ ✅ **COMPLETED**
-- ~~Memory management~~ (Basic pointer safety implemented)
 - True pointer modification (reference semantics)
-- Manual memory allocation/deallocation
+
 
 ## Directory Structure
 

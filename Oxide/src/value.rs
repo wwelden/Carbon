@@ -27,7 +27,7 @@ pub enum Value {
     TypedFunction {
         env: Environment,
         params: Vec<(Type, Var)>,
-        return_type: Option<Type>,
+        return_type: Option<Vec<Type>>,  // Support multiple return types
         statements: Vec<Statement>,
         return_expr: Box<Expr>,
     },

@@ -13,7 +13,7 @@ pub enum Statement {
     VarStmt(Var, Expr),
     TypedVarStmt(Type, Var, Expr),
     TypedLetStmt(Type, Var, Expr),
-    FnDeclStmt(Var, Vec<(Type, Var)>, Option<Type>, Vec<Statement>, Expr),
+    FnDeclStmt(Var, Vec<(Type, Var)>, Option<Vec<Type>>, Vec<Statement>, Expr),  // Multiple return types
     ClassStmt(ClassName, Option<ClassName>, Vec<ClassMember>),
     ForInStmt(Var, Expr, Vec<Statement>),
     WhileStmt(Expr, Vec<Statement>),
@@ -22,6 +22,7 @@ pub enum Statement {
     IncrementStmt(Var),
     DecrementStmt(Var),
     PointerAssignStmt(Expr, Expr),  // *ptr = value
+    MultipleAssignStmt(Vec<Var>, Expr),  // a, b, c := function_call()
     ReturnStmt(Expr),
 }
 
@@ -104,6 +105,7 @@ pub enum Expr {
     PtrArithExpr(Box<Expr>, i64),                // Pointer arithmetic (ptr + offset)
     PtrIncrementExpr(Box<Expr>),                 // Pointer increment (ptr++)
     PtrDecrementExpr(Box<Expr>),                 // Pointer decrement (ptr--)
+    MultipleReturnExpr(Vec<Expr>),               // Multiple return values: return a, b, c
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -72,6 +72,36 @@ impl Parser {
                         self.consume_semicolon()?;
                         Ok(Statement::ExprStmt(Expr::BOpExpr(BOp::EqOp, Box::new(Expr::VarExpr(name)), Box::new(expr))))
                     }
+                    Token::Comma => {
+                        // Check for multiple assignment: a, b, c := function_call()
+                        let mut vars = vec![name];
+
+                        // Consume comma-separated identifiers
+                        while self.match_token(&Token::Comma) {
+                            if let Token::Identifier(var_name) = self.advance().clone() {
+                                vars.push(var_name);
+                            } else {
+                                // Not a multiple assignment, backtrack
+                                self.current -= 1;
+                                let expr = self.expression()?;
+                                self.consume_semicolon()?;
+                                return Ok(Statement::ExprStmt(expr));
+                            }
+                        }
+
+                        if self.match_token(&Token::MultipleAssign) {
+                            // Multiple assignment confirmed
+                            let expr = self.expression()?;
+                            self.consume_semicolon()?;
+                            Ok(Statement::MultipleAssignStmt(vars, expr))
+                        } else {
+                            // Not a multiple assignment, backtrack and parse as expression
+                            self.current -= vars.len(); // backtrack to start
+                            let expr = self.expression()?;
+                            self.consume_semicolon()?;
+                            Ok(Statement::ExprStmt(expr))
+                        }
+                    }
                     _ => {
                         // It's an expression statement, backtrack
                         self.current -= 1;
@@ -97,6 +127,7 @@ impl Parser {
                     Ok(Statement::ExprStmt(expr))
                 }
             }
+
             _ => {
                 let expr = self.expression()?;
                 self.consume_semicolon()?;
@@ -117,12 +148,33 @@ impl Parser {
             self.consume_semicolon()?;
             Ok(Statement::TypedLetStmt(var_type, name, expr))
         } else {
-            // Regular let statement: let x = 42
-            let name = self.consume_identifier()?;
-            self.consume(&Token::Assign)?;
-            let expr = self.expression()?;
-            self.consume_semicolon()?;
-            Ok(Statement::LetStmt(name, expr))
+            // Check for multiple assignment: let a, b, c := expr
+            let first_name = self.consume_identifier()?;
+
+            if self.match_token(&Token::Comma) {
+                // Multiple assignment
+                let mut vars = vec![first_name];
+
+                // Consume comma-separated identifiers
+                loop {
+                    let var_name = self.consume_identifier()?;
+                    vars.push(var_name);
+                    if !self.match_token(&Token::Comma) {
+                        break;
+                    }
+                }
+
+                self.consume(&Token::MultipleAssign)?;
+                let expr = self.expression()?;
+                self.consume_semicolon()?;
+                Ok(Statement::MultipleAssignStmt(vars, expr))
+            } else {
+                // Regular let statement: let x = 42
+                self.consume(&Token::Assign)?;
+                let expr = self.expression()?;
+                self.consume_semicolon()?;
+                Ok(Statement::LetStmt(first_name, expr))
+            }
         }
     }
 
@@ -160,9 +212,24 @@ impl Parser {
         let params = self.parameter_list()?;
         self.consume(&Token::RightParen)?;
 
-        // Check for optional return type annotation
-        let return_type = if self.match_token(&Token::Arrow) {
-            Some(self.parse_type()?)
+        // Check for optional return type annotation (single or multiple)
+        // Correct syntax: fn name(type param) returnType or fn name(type param) (type1, type2, type3)
+        let return_type = if self.match_token(&Token::LeftParen) {
+            // Multiple return types: (int, string, bool)
+            let mut types = Vec::new();
+            if !self.check(&Token::RightParen) {
+                loop {
+                    types.push(self.parse_type()?);
+                    if !self.match_token(&Token::Comma) {
+                        break;
+                    }
+                }
+            }
+            self.consume(&Token::RightParen)?;
+            Some(types)
+        } else if matches!(self.peek(), Token::IntType | Token::BoolType | Token::StringType | Token::ArrayListType | Token::SetType | Token::MapType | Token::StackType | Token::QueueType | Token::LinkedListType | Token::Identifier(_)) {
+            // Single return type: fn name() type
+            Some(vec![self.parse_type()?])
         } else {
             None
         };
@@ -254,9 +321,26 @@ impl Parser {
 
     fn return_statement(&mut self) -> Result<Statement> {
         self.consume(&Token::Return)?;
-        let expr = self.expression()?;
-        self.consume_semicolon()?;
-        Ok(Statement::ReturnStmt(expr))
+
+        // Check for multiple return values: return a, b, c
+        let first_expr = self.expression()?;
+
+        if self.match_token(&Token::Comma) {
+            // Multiple return values
+            let mut exprs = vec![first_expr];
+            loop {
+                exprs.push(self.expression()?);
+                if !self.match_token(&Token::Comma) {
+                    break;
+                }
+            }
+            self.consume_semicolon()?;
+            Ok(Statement::ReturnStmt(Expr::MultipleReturnExpr(exprs)))
+        } else {
+            // Single return value
+            self.consume_semicolon()?;
+            Ok(Statement::ReturnStmt(first_expr))
+        }
     }
 
     fn parameter_list(&mut self) -> Result<Vec<(Type, Var)>> {
@@ -488,13 +572,35 @@ impl Parser {
 
         loop {
             if self.match_token(&Token::LeftParen) {
-                let arg = self.expression()?;
+                // Handle function calls with multiple arguments
+                let mut args = Vec::new();
+
+                if !self.check(&Token::RightParen) {
+                    loop {
+                        args.push(self.expression()?);
+                        if !self.match_token(&Token::Comma) {
+                            break;
+                        }
+                    }
+                }
+
                 self.consume(&Token::RightParen)?;
-                expr = Expr::ApplyExpr(Box::new(expr), Box::new(arg));
+
+                // For now, we'll create a tuple for multiple arguments
+                if args.len() == 1 {
+                    expr = Expr::ApplyExpr(Box::new(expr), Box::new(args[0].clone()));
+                } else if args.is_empty() {
+                    expr = Expr::ApplyExpr(Box::new(expr), Box::new(Expr::NullExpr));
+                } else {
+                    // Multiple arguments - create a tuple
+                    expr = Expr::ApplyExpr(Box::new(expr), Box::new(Expr::TupleExpr(args)));
+                }
             } else if self.match_token(&Token::Dot) {
                 let method_name = self.consume_identifier()?;
                 if method_name == "len" {
                     expr = Expr::ArrayLenExpr(Box::new(expr));
+                } else if method_name == "sum" {
+                    expr = Expr::SumExpr(Box::new(expr));
                 } else if self.match_token(&Token::LeftParen) {
                     // Handle method calls with multiple arguments
                     let mut args = Vec::new();
@@ -609,12 +715,7 @@ impl Parser {
                 self.consume(&Token::RightParen)?;
                 Ok(Expr::ToDecimalExpr(Box::new(expr)))
             }
-            Token::Sum => {
-                self.consume(&Token::LeftParen)?;
-                let expr = self.expression()?;
-                self.consume(&Token::RightParen)?;
-                Ok(Expr::SumExpr(Box::new(expr)))
-            }
+
             Token::Err => {
                 self.consume(&Token::LeftParen)?;
                 let msg = match self.advance().clone() {
