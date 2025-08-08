@@ -156,6 +156,8 @@ bin/oxide
 - Do while loops
 - Advanced generics with constraints
 - True pointer modification (reference semantics)
+- chars
+- strings are arrays of chars and don't need to be converted
 
 
 ## Directory Structure
