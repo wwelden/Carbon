@@ -3386,21 +3386,16 @@ impl Evaluator {
 
             // Check if setter already exists
             if !methods.iter().any(|(name, _, _)| name == &setter_name) {
-                let setter_expr = Expr::BOpExpr(
-                    BOp::EqOp,
-                    Box::new(Expr::FieldAccessExpr(
-                        Box::new(Expr::ThisExpr),
-                        field.clone(),
-                    )),
-                    Box::new(Expr::VarExpr("value".to_string())),
-                );
+                // Setter returns the provided value for chaining; field mutation is not persisted in this simplified model
+                let setter_expr = Expr::VarExpr("value".to_string());
                 methods.push((setter_name, "value".to_string(), setter_expr));
             }
         }
 
         // Add init method if it doesn't exist
         if !methods.iter().any(|(name, _, _)| name == "init") {
-            let init_expr = Expr::VarExpr("value".to_string());
+            // Return the object itself for chaining: 'this'
+            let init_expr = Expr::ThisExpr;
             methods.push(("init".to_string(), "value".to_string(), init_expr));
         }
     }
