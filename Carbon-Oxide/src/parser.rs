@@ -41,6 +41,7 @@ impl Parser {
             Token::Fn => self.fn_declaration(),
             Token::Class => self.class_statement(),
             Token::For => self.for_statement(),
+            Token::While => self.while_statement(),
             Token::Do => self.do_while_statement(),
             Token::Return => self.return_statement(),
             Token::Identifier(name) => {
@@ -291,6 +292,17 @@ impl Parser {
             self.consume(&Token::RightBrace)?;
             Ok(Statement::WhileStmt(condition, statements))
         }
+    }
+
+    fn while_statement(&mut self) -> Result<Statement> {
+        self.consume(&Token::While)?;
+        self.consume(&Token::LeftParen)?;
+        let condition = self.expression()?;
+        self.consume(&Token::RightParen)?;
+        self.consume(&Token::LeftBrace)?;
+        let statements = self.statement_list()?;
+        self.consume(&Token::RightBrace)?;
+        Ok(Statement::WhileStmt(condition, statements))
     }
 
     fn peek_for_in(&self) -> bool {
@@ -736,6 +748,7 @@ impl Parser {
             Token::If => self.if_expression(),
             Token::Match => self.match_expression(),
             Token::For => self.for_expression_or_while(),
+            Token::While => self.while_expression(),
             Token::Function => self.function_expression(),
             Token::New => self.new_expression(),
 
@@ -927,6 +940,17 @@ impl Parser {
 
             Ok(Expr::WhileExpr(Box::new(condition), Box::new(body)))
         }
+    }
+
+    fn while_expression(&mut self) -> Result<Expr> {
+        // while (condition) { expr }
+        self.consume(&Token::LeftParen)?;
+        let condition = self.expression()?;
+        self.consume(&Token::RightParen)?;
+        self.consume(&Token::LeftBrace)?;
+        let body = self.expression()?;
+        self.consume(&Token::RightBrace)?;
+        Ok(Expr::WhileExpr(Box::new(condition), Box::new(body)))
     }
 
     fn function_expression(&mut self) -> Result<Expr> {

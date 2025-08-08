@@ -150,14 +150,18 @@ bin/oxide
   - **Type Safety**: Proper type checking and runtime error prevention
 
 ### 🚧 In Development
-
+ 
 - Module system and imports
 - Performance optimizations
-- Do while loops
 - Advanced generics with constraints
 - True pointer modification (reference semantics)
 - chars
 - strings are arrays of chars and don't need to be converted
+
+### ✅ Newly Completed
+
+- Explicit while loops: `while (condition) { ... }`
+- Do-while loops: `do { ... } while (condition);`
 
 
 ## Directory Structure
